@@ -755,7 +755,7 @@ body.bilingual-mode #vault .pizza-en{margin-top:15px;padding-top:15px;border-top
 .back-to-top{
     --back-top-bottom:18px;
     position:fixed;
-    right:8px;
+    right:max(8px, calc((100vw - 1080px) / 2 - 60px));
     bottom:calc(var(--back-top-bottom) + env(safe-area-inset-bottom,0px));
     z-index:1200;
     width:52px;
