@@ -14,13 +14,7 @@ function toggle(card){
   if(!card || card.classList.contains('short-clause')) return;
   card.classList.toggle('open');
   const arrow=card.querySelector('.arrow');
-  if(arrow){
-    const open=card.classList.contains('open');
-    arrow.textContent=open?'⌃':'⌄';
-    arrow.setAttribute('aria-expanded',String(open));
-    const code=card.querySelector('.code');
-    if(arrow.classList.contains('clause-expand')&&code) arrow.setAttribute('aria-label',(open?'收合 ':'展開 ')+code.textContent.trim()+' 條款');
-  }
+  if(arrow) arrow.textContent=card.classList.contains('open')?'⌃':'⌄';
 }
 
 function filterCards(cat,btn){
@@ -101,7 +95,7 @@ function fallbackCopy(text,done){
 document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.long-clause').forEach(function(card){
     const head=card.querySelector('.cardhead');
-    if(head&&!card.querySelector('.clause-expand')) head.onclick=function(){toggle(card);};
+    if(head) head.onclick=function(){toggle(card);};
   });
   const active=document.querySelector('.lang button.active');
   setLanguage('zh',active);
@@ -247,7 +241,6 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
 })();
 
 (function(){
-  if('scrollRestoration' in history) history.scrollRestoration='manual';
   function focusClause(){
     var targetCode=document.body.getAttribute('data-clause-code');
     if(!targetCode) return;
@@ -259,21 +252,14 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
     card.style.removeProperty('display');
     card.classList.add('open');
     var arrow=card.querySelector('.arrow');
-    if(arrow){
-      arrow.textContent='⌃';
-      arrow.setAttribute('aria-expanded','true');
-    }
+    if(arrow) arrow.textContent='⌃';
     function scrollCard(){
       requestAnimationFrame(function(){
         requestAnimationFrame(function(){card.scrollIntoView({block:'center',behavior:'auto'});});
       });
     }
     scrollCard();
-    [60,180,420,900].forEach(function(delay){setTimeout(scrollCard,delay);});
-    window.addEventListener('load',function(){scrollCard();setTimeout(scrollCard,120);},{once:true});
-    window.addEventListener('pageshow',function(){scrollCard();setTimeout(scrollCard,120);},{once:true});
-    var hero=document.querySelector('.hero img');
-    if(hero&&!hero.complete) hero.addEventListener('load',scrollCard,{once:true});
+    window.addEventListener('load',scrollCard,{once:true});
     if(document.fonts&&document.fonts.ready) document.fonts.ready.then(scrollCard);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',focusClause);
