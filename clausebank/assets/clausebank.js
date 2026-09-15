@@ -253,9 +253,14 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
     card.classList.add('open');
     var arrow=card.querySelector('.arrow');
     if(arrow) arrow.textContent='⌃';
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){card.scrollIntoView({block:'center',behavior:'auto'});});
-    });
+    function scrollCard(){
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){card.scrollIntoView({block:'center',behavior:'auto'});});
+      });
+    }
+    scrollCard();
+    window.addEventListener('load',scrollCard,{once:true});
+    if(document.fonts&&document.fonts.ready) document.fonts.ready.then(scrollCard);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',focusClause);
   else focusClause();
