@@ -2458,7 +2458,9 @@ body.review-page-active header.hero{
   header.hero img{object-fit:cover;object-position:center center;}
 
   #vault .toolbar{
-    position:static;
+    position:sticky;
+    top:0;
+    z-index:1000;
     width:100%;
     margin:0;
     padding:14px 16px 12px;
@@ -4291,5 +4293,61 @@ document.addEventListener('DOMContentLoaded',function(){
   update();
 })();
 </script>
+
+<script>
+(function(){
+  const toolbar = document.querySelector('#vault .toolbar');
+  if (!toolbar) return;
+
+  const spacer = document.createElement('div');
+  spacer.setAttribute('aria-hidden','true');
+  toolbar.parentNode.insertBefore(spacer, toolbar);
+
+  const mq = window.matchMedia('(max-width:700px)');
+  let anchorTop = 0;
+
+  function reset(){
+    toolbar.style.removeProperty('position');
+    toolbar.style.removeProperty('top');
+    toolbar.style.removeProperty('left');
+    toolbar.style.removeProperty('right');
+    toolbar.style.removeProperty('width');
+    toolbar.style.removeProperty('z-index');
+    spacer.style.height = '0px';
+  }
+
+  function measure(){
+    reset();
+    anchorTop = toolbar.getBoundingClientRect().top + window.scrollY;
+    update();
+  }
+
+  function update(){
+    if (!mq.matches) {
+      reset();
+      return;
+    }
+
+    if (window.scrollY >= anchorTop) {
+      const h = toolbar.offsetHeight;
+      spacer.style.height = h + 'px';
+      toolbar.style.position = 'fixed';
+      toolbar.style.top = '0';
+      toolbar.style.left = '0';
+      toolbar.style.right = '0';
+      toolbar.style.width = '100%';
+      toolbar.style.zIndex = '10000';
+    } else {
+      reset();
+    }
+  }
+
+  window.addEventListener('scroll', update, {passive:true});
+  window.addEventListener('resize', measure);
+  window.addEventListener('load', measure, {once:true});
+  measure();
+})();
+</script>
+
 </body>
 </html>
