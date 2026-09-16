@@ -277,6 +277,18 @@ footer{ padding:18px 28px; flex-direction:column; align-items:flex-start; }
     margin-top:-4px;
   }
 .toolbar-spacer{ display:none; }
+@media (max-width:700px){
+  #vault .toolbar.mobile-toolbar-fixed{
+    position:fixed!important;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+    width:100%!important;
+    margin:0!important;
+  }
+  #vault .toolbar-spacer.mobile-toolbar-spacer-active{display:block;}
+}
 .pen-bottom-line{stroke:currentColor;stroke-width:1.8;stroke-linecap:round;fill:none;}
 .clause-library{display:grid;gap:12px;width:100%;}
 .clause-library .card{background:var(--paper2);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
