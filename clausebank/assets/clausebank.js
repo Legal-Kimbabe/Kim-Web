@@ -278,6 +278,7 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
   var mobile=window.matchMedia('(max-width:700px)');
   var anchorTop=0;
   var ticking=false;
+  var measuredWidth=window.innerWidth;
   function measure(){
     toolbar.classList.remove('mobile-toolbar-fixed');
     spacer.classList.remove('mobile-toolbar-spacer-active');
@@ -305,7 +306,10 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
     requestAnimationFrame(update);
   }
   window.addEventListener('scroll',requestUpdate,{passive:true});
-  window.addEventListener('resize',measure);
+  window.addEventListener('resize',function(){
+    if(window.innerWidth!==measuredWidth){measuredWidth=window.innerWidth;measure();}
+    else requestUpdate();
+  });
   window.addEventListener('load',measure,{once:true});
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(measure);
   measure();
