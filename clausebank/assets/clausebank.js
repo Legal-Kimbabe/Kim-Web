@@ -12,29 +12,12 @@ window.setActivePage=function(page,btn){
 
 function toggle(card){
   if(!card || card.classList.contains('short-clause')) return;
-
-  // On mobile, expanding/collapsing a card changes the page height and can make
-  // Safari reset the horizontally scrolled category strip back to "全部".
-  // Preserve the user's current category-strip position across the layout change.
-  const filters=document.querySelector('#vault .filters');
-  const filterScrollLeft=filters?filters.scrollLeft:0;
-
   card.classList.toggle('open');
   const arrow=card.querySelector('.arrow');
   if(arrow){
     const open=card.classList.contains('open');
     arrow.textContent=open?'⌃':'⌄';
     arrow.setAttribute('aria-expanded',String(open));
-  }
-
-  if(filters && window.matchMedia('(max-width:700px)').matches){
-    const restoreFilterPosition=function(){filters.scrollLeft=filterScrollLeft;};
-    restoreFilterPosition();
-    requestAnimationFrame(function(){
-      restoreFilterPosition();
-      requestAnimationFrame(restoreFilterPosition);
-    });
-    setTimeout(restoreFilterPosition,120);
   }
 }
 
