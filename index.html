@@ -3200,7 +3200,7 @@ body.bilingual-mode #vault .pizza-en{margin-top:15px;padding-top:15px;border-top
 <main>
 <section class="page active" id="vault">
 <div class="clausebank-single-source">
-<p>條款金庫已移至獨立頁面。</p>
+<p>免費中英文商務契約條款與範本。</p>
 <a href="/clausebank/" class="clausebank-enter-link">進入條款金庫 ClauseBank</a>
 </div>
 </section>
@@ -3485,7 +3485,7 @@ document.addEventListener('DOMContentLoaded',function(){
   if(draftFree && !document.querySelector('#draft .consult-entry')){
     draftFree.insertAdjacentHTML('afterend','<div class="consult-entry"><span class="consult-kicker">免費初步諮詢</span><a class="consult-link" href="mailto:Kim.Br35Ba56@gmail.com?subject=%5B%E5%85%8D%E8%B2%BB%E5%88%9D%E6%AD%A5%E8%AB%AE%E8%A9%A2%5D%20%E5%A5%91%E7%B4%84%E6%92%B0%E5%AF%AB" aria-label="以電子郵件進行契約撰寫免費初步諮詢"><span>TALK TO KIM</span><span class="consult-arrow" aria-hidden="true">↗</span></a></div>');
   }
-  if(location.pathname==='/' || location.pathname==='/index.html') location.replace('/clausebank/');
+  window.setActivePage('vault',document.querySelector('.nav-item[data-page="vault"]'));
 });
 </script>
 <script id="draft-v62-interaction">
