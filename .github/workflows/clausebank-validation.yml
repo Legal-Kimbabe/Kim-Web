@@ -1,0 +1,32 @@
+name: ClauseBank static validation
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate ClauseBank pages
+        run: python3 -B scripts/build_clausebank.py
+      - name: Validate ClauseBank and SEO baseline
+        run: python3 -B scripts/validate_clausebank.py
+      - name: Require committed generated output
+        run: |
+          git diff --exit-code
+          if [ -n "$(git status --porcelain)" ]; then
+            git status --short
+            exit 1
+          fi
