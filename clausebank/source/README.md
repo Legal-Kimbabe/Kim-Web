@@ -2,7 +2,7 @@
 
 `clauses.txt` is the only manually maintained source for ClauseBank clause data. It is deliberately served as plain text, not an extra indexable HTML page. It was bootstrapped byte-for-byte from the approved 98-card `/clausebank/` landing page at `ca99b687`. Each `<article>` records its code, category/search terms, Chinese and English titles, applicability, short/long mode, Chinese and English clause bodies, and the existing semantic URL. The top filter block is the canonical category list. The `homepage-order` comment records the separately approved homepage presentation order; it does not duplicate clause text.
 
-The homepage, `/clausebank/`, and semantic HTML pages are **generated output**. Do not edit clause data in them. The homepage keeps its own cardhead presentation/onclick structure, while standalone ClauseBank pages use the standalone cardhead. Both get the same clause fields and body from `clauses.html`. The generator changes only ClauseBank filter/card markup in existing indexed pages: existing `<head>`, H1, URL, and deep-link code remain untouched.
+The homepage, `/clausebank/`, and semantic HTML pages are **generated output**. Do not edit clause data in them. The homepage keeps its own cardhead presentation/onclick structure, while standalone ClauseBank pages use the standalone cardhead. Both get the same clause fields and body from `clauses.txt`. The generator changes only ClauseBank filter/card markup in existing indexed pages: existing `<head>`, H1, URL, and deep-link code remain untouched.
 
 To add a 99th clause, edit only `clauses.txt`: add one complete card with a unique code, finalized content, category/mode, and semantic `<a href>` (plus a filter button there if it is a new category). Then run:
 
