@@ -99,7 +99,15 @@ function fallbackCopy(text,done){
 document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.long-clause').forEach(function(card){
     const head=card.querySelector('.cardhead');
-    if(head) head.onclick=function(){toggle(card);};
+    if(head) head.onclick=function(event){
+      // The arrow has its own inline toggle handler; do not toggle again on bubbling.
+      if(event.target.closest('.clause-expand')) return;
+      // Keep crawlable semantic links, but make the full header a toggle on mobile.
+      if(window.matchMedia('(max-width:700px)').matches && event.target.closest('.clause-semantic-link')){
+        event.preventDefault();
+      }
+      toggle(card);
+    };
   });
   const active=document.querySelector('.lang button.active');
   setLanguage('zh',active);
@@ -281,4 +289,3 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',focusClause);
   else focusClause();
 })();
-

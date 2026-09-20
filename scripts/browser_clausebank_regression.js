@@ -68,6 +68,31 @@ async function run() {
         assert(Math.abs((await filters.evaluate(el => el.scrollLeft)) - selectedScroll) <= 2,
           `${route} ${width}: filter strip jumped step ${step}`);
       }
+      if (width <= 700) {
+        const originalUrl = page.url();
+        for (let step = 0; step < 3; step++) {
+          const wasOpen = await warranty.evaluate(el => el.classList.contains('open'));
+          await warranty.locator('.clause-semantic-link .title').click();
+          assert(page.url() === originalUrl, `${route}: mobile title navigated step ${step}`);
+          assert(await warranty.evaluate(el => el.classList.contains('open')) !== wasOpen,
+            `${route}: mobile title did not toggle exactly once step ${step}`);
+          assert(await page.locator('[data-filter="warranty"]').evaluate(el => el.classList.contains('active')),
+            `${route}: mobile title reset filter step ${step}`);
+        }
+        for (const selector of ['.clause-semantic-link .code', '.en', '.applicability']) {
+          const wasOpen = await warranty.evaluate(el => el.classList.contains('open'));
+          await warranty.locator(selector).click();
+          assert(page.url() === originalUrl &&
+            await warranty.evaluate(el => el.classList.contains('open')) !== wasOpen &&
+            await page.locator('[data-filter="warranty"]').evaluate(el => el.classList.contains('active')),
+            `${route}: mobile ${selector} must toggle once without navigation or filter reset`);
+        }
+        const wasOpen = await warranty.evaluate(el => el.classList.contains('open'));
+        await warranty.locator('.clause-expand').click();
+        assert(page.url() === originalUrl &&
+          await warranty.evaluate(el => el.classList.contains('open')) !== wasOpen,
+          `${route}: mobile arrow must toggle exactly once without navigation`);
+      }
       const lang = page.locator('#vault .lang');
       await lang.getByText('EN', {exact: true}).click();
       assert(await page.evaluate(() => document.body.classList.contains('en-mode')),
@@ -76,6 +101,8 @@ async function run() {
       assert(await page.evaluate(() => document.body.classList.contains('bilingual-mode')),
         `${route} ${width}: bilingual toggle`);
       await lang.getByText('中文', {exact: true}).click();
+      if (!await warranty.evaluate(el => el.classList.contains('open')))
+        await warranty.locator('.en').click();
       await warranty.locator('.copy').click();
       await page.waitForTimeout(250);
       assert(postCount > 0, `${route} ${width}: Supabase copy increment`);
@@ -92,10 +119,15 @@ async function run() {
       assert(lifted > (width <= 700 ? 12 : 18),
         `${route} ${width}: footer did not lift LWYRUP`);
       if (width <= 700) assert(await page.locator('#vault .toolbar').evaluate(
-        el => el.classList.contains('mobile-toolbar-fixed')),
-        `${route} ${width}: mobile toolbar did not fix`);
+        el => getComputedStyle(el).position === 'sticky'),
+        `${route} ${width}: mobile toolbar is not sticky`);
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
         `${route} ${width}: horizontal overflow after interaction`);
+      if (width > 700) {
+        await page.locator('[data-search^="WT-01 "] .clause-semantic-link').click();
+        assert(new URL(page.url()).pathname === '/clausebank/warranty-against-defects/',
+          `${route}: desktop semantic link did not navigate`);
+      }
       console.log(`PASS ${width}x${height} ${route}: 98 cards, UX, copy/count, no overflow`);
       tested++;
       await context.close();
