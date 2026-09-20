@@ -211,18 +211,24 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
 })();
 
 (function(){
+  function init(){
   var button=document.querySelector('.back-to-top');
   if(!button) return;
   var footer=document.querySelector('.site-footer');
   var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
   var mobileQuery=window.matchMedia('(max-width:700px)');
   var ticking=false;
+  function vaultVisible(){
+    var vault=document.getElementById('vault');
+    return vault && getComputedStyle(vault).display!=='none';
+  }
   function update(){
-    var show=window.scrollY>Math.max(420,window.innerHeight*.7);
+    var visible=vaultVisible();
+    var show=visible && window.scrollY>Math.max(420,window.innerHeight*.7);
     button.classList.toggle('is-visible',show);
     var base=mobileQuery.matches?12:18;
     var lift=base;
-    if(footer){
+    if(footer && visible){
       var rect=footer.getBoundingClientRect();
       if(rect.top<window.innerHeight&&rect.bottom>0){
         lift=Math.max(base,window.innerHeight-rect.top+12);
@@ -241,7 +247,13 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
   });
   window.addEventListener('scroll',requestUpdate,{passive:true});
   window.addEventListener('resize',requestUpdate);
+  document.querySelectorAll('.nav-item').forEach(function(item){
+    item.addEventListener('click',function(){setTimeout(requestUpdate,0);});
+  });
   update();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+  else init();
 })();
 
 (function(){
