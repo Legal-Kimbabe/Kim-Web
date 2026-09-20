@@ -20,9 +20,9 @@ jobs:
         with:
           python-version: '3.11'
       - name: Generate ClauseBank pages
-        run: python3 scripts/build_clausebank.py
+        run: python3 -B scripts/build_clausebank.py
       - name: Validate ClauseBank and SEO baseline
-        run: python3 scripts/validate_clausebank.py
+        run: python3 -B scripts/validate_clausebank.py
       - name: Require committed generated output
         run: |
           git diff --exit-code
