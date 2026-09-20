@@ -219,6 +219,56 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
 })();
 
 (function(){
+  function initMobileToolbarFreeze(){
+    var toolbar=document.querySelector('#vault .toolbar');
+    var spacer=document.querySelector('#vault .toolbar-spacer');
+    if(!toolbar||!spacer) return;
+    var mobileQuery=window.matchMedia('(max-width:700px)');
+    var freezeAt=0;
+    var ticking=false;
+
+    function measure(){
+      toolbar.classList.remove('mobile-toolbar-fixed');
+      spacer.classList.remove('mobile-toolbar-spacer-active');
+      spacer.style.height='';
+      freezeAt=toolbar.getBoundingClientRect().top+window.scrollY;
+      update();
+    }
+    function update(){
+      if(!mobileQuery.matches){
+        toolbar.classList.remove('mobile-toolbar-fixed');
+        spacer.classList.remove('mobile-toolbar-spacer-active');
+        spacer.style.height='';
+        ticking=false;
+        return;
+      }
+      var shouldFreeze=window.scrollY>=freezeAt;
+      if(shouldFreeze){
+        spacer.style.height=toolbar.offsetHeight+'px';
+        spacer.classList.add('mobile-toolbar-spacer-active');
+        toolbar.classList.add('mobile-toolbar-fixed');
+      }else{
+        toolbar.classList.remove('mobile-toolbar-fixed');
+        spacer.classList.remove('mobile-toolbar-spacer-active');
+        spacer.style.height='';
+      }
+      ticking=false;
+    }
+    function requestUpdate(){
+      if(ticking) return;
+      ticking=true;
+      requestAnimationFrame(update);
+    }
+    window.addEventListener('scroll',requestUpdate,{passive:true});
+    window.addEventListener('resize',measure);
+    if(mobileQuery.addEventListener) mobileQuery.addEventListener('change',measure);
+    measure();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initMobileToolbarFreeze);
+  else initMobileToolbarFreeze();
+})();
+
+(function(){
   function init(){
   var button=document.querySelector('.back-to-top');
   if(!button) return;
