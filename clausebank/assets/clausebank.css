@@ -827,3 +827,45 @@ body.bilingual-mode #vault .pizza-en{margin-top:15px;padding-top:15px;border-top
 .back-to-top,
     .back-to-top-plate{transition:none;}
 }
+
+/* === ClauseBank editorial header + approved v5 proportions === */
+.editorial-site-header{
+  width:min(1120px,calc(100% - 68px));height:58px;margin:0 auto;
+  display:flex;align-items:center;border-bottom:1px solid rgba(24,22,19,.28);
+  font-family:Arial,Helvetica,sans-serif;letter-spacing:.08em;position:relative;z-index:1502;
+}
+.editorial-brand{color:#171512;text-decoration:none;font-size:15px;font-weight:800;white-space:nowrap;}
+.editorial-desktop-nav{margin-left:auto;display:flex;align-items:center;gap:25px;}
+.editorial-desktop-nav a{color:#3c3832;text-decoration:none;font-size:10px;font-weight:700;white-space:nowrap;position:relative;}
+.editorial-desktop-nav a.is-current::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:2px;background:#c85d50;}
+.editorial-service-toggle,.editorial-service-overlay{display:none;}
+body.linked-clausebank header.hero{
+  display:block!important;width:min(1116px,calc(90vw - 44px))!important;height:auto!important;
+  min-height:0!important;margin:0 auto!important;padding:16px 0 0!important;overflow:hidden!important;
+}
+body.linked-clausebank header.hero img{
+  display:block!important;width:100%!important;height:auto!important;object-fit:contain!important;
+  object-position:center!important;margin-top:-5.7%!important;margin-bottom:-.5%!important;
+}
+#vault .toolbar{max-width:1080px;}
+@media(max-width:700px){
+  .editorial-site-header{width:100%;height:58px;padding:0 18px;}
+  .editorial-desktop-nav{display:none;}
+  .editorial-service-toggle{display:block;margin-left:auto;padding:0;border:0;background:transparent;color:#171512;
+    font:800 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.1em;cursor:pointer;}
+  .editorial-service-toggle sup{font-size:8px;position:relative;top:-.2em;margin-left:2px;}
+  .editorial-service-overlay{display:block;position:fixed;z-index:1501;left:0;right:0;top:58px;bottom:0;
+    background:rgba(20,18,15,.78);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,visibility .2s ease;}
+  .editorial-service-overlay.is-open{opacity:1;visibility:visible;pointer-events:auto;}
+  .editorial-service-menu{padding:42px 26px;display:flex;flex-direction:column;gap:26px;}
+  .editorial-service-menu a{color:#f4eee3;text-decoration:none;font-family:Arial,Helvetica,sans-serif;}
+  .editorial-service-menu span{display:block;font-size:17px;font-weight:800;letter-spacing:.07em;}
+  .editorial-service-menu small{display:block;margin-top:5px;font-size:11px;letter-spacing:.12em;opacity:.68;}
+  .editorial-service-menu a.is-current span{color:#ef8b7e;}
+  body.editorial-menu-open{overflow:hidden;}
+  body.linked-clausebank header.hero{width:100%!important;padding-top:12px!important;overflow:hidden!important;}
+  body.linked-clausebank header.hero img{width:100%!important;height:auto!important;margin-top:-5.7%!important;margin-bottom:0!important;}
+  #vault .toolbar{max-width:1080px;}
+}
+@media(prefers-reduced-motion:reduce){.editorial-service-overlay{transition:none;}}
