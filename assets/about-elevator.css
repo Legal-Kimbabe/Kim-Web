@@ -206,3 +206,18 @@
 .ae-modal-card{box-shadow:0 28px 90px #000c}
 .ae-p3-closeup.is-open~.ae-panel{opacity:0;pointer-events:none}
 @media(max-width:700px){.ae-stage.is-inside-rf .ae-rf-room{transform:scale(1.04)}.ae-rf-brand span{font-size:10px;line-height:1.55}}
+
+/* prototype pass 9: first-view restraint + accessibility */
+.ae-stage{isolation:isolate}
+.ae-stage[data-floor="P3"] .ae-status,.ae-stage[data-floor="P2"] .ae-status,.ae-stage[data-floor="RF"] .ae-status{opacity:.58}
+.ae-stage.is-moving .ae-floor{pointer-events:none}
+.ae-panel{z-index:22}
+.ae-doors{z-index:20}
+.ae-back-to-lift{z-index:24}
+.ae-modal{z-index:50}
+.ae-p3-closeup{z-index:26}
+.ae-p2-board-content br{display:block}
+.ae-p2-board-content .team-photo-credentials{margin-top:4px}
+.ae-rf-room button{touch-action:manipulation}
+.ae-rf-brand{pointer-events:none}
+@media(hover:none){.ae-object:hover,.ae-p2-board:hover{filter:none;transform:none}}
