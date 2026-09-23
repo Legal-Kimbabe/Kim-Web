@@ -126,7 +126,7 @@ def main(expected_count: int) -> None:
                 check(approved_value is not None and output_value is not None
                       and approved_value.group(1) == output_value.group(1),
                       f'{attr} changed: {relative} {code(original)}')
-        if subprocess.run(['git', 'cat-file', '-e', f'{BASELINE}:{relative}'],
+        if relative not in ('index.html', 'clausebank/index.html') and subprocess.run(['git', 'cat-file', '-e', f'{BASELINE}:{relative}'],
                           cwd=ROOT, stdout=subprocess.DEVNULL,
                           stderr=subprocess.DEVNULL).returncode == 0:
             check(seo_signature(page) == seo_signature(baseline(relative)),
@@ -144,8 +144,17 @@ def main(expected_count: int) -> None:
             check('<title></title>' not in page and '<meta name="description" content=""' not in page,
                   f'empty SEO metadata: {relative}')
             check('noindex' not in page.lower(), f'not indexable: {relative}')
-    check((ROOT / 'index.html').read_text(encoding='utf-8').count('id="vault"') == 1,
-          'homepage vault missing')
+    home_text = (ROOT / 'index.html').read_text(encoding='utf-8')
+    alias_text = (ROOT / 'clausebank/index.html').read_text(encoding='utf-8')
+    check(home_text.count('id="vault"') == 1, 'homepage vault missing')
+    check('<link rel="canonical" href="https://www.legal-kim.com/"/>' in home_text,
+          'root canonical must be root')
+    check('<meta property="og:url" content="https://www.legal-kim.com/"/>' in home_text,
+          'root OG URL must be root')
+    check('<link rel="canonical" href="https://www.legal-kim.com/"/>' in alias_text,
+          'ClauseBank alias canonical must point to root')
+    check('<meta property="og:url" content="https://www.legal-kim.com/"/>' in alias_text,
+          'ClauseBank alias OG URL must point to root')
     check('clause-copy-count-js' not in (ROOT / 'index.html').read_text(encoding='utf-8'),
           'homepage duplicated copy-count implementation')
     for name in SERVICE:
@@ -161,7 +170,7 @@ def main(expected_count: int) -> None:
             check(marker in page, f'visible service section missing: {relative} {section}')
     sitemap = ElementTree.fromstring((ROOT / 'sitemap.xml').read_text(encoding='utf-8'))
     urls = [node.text for node in sitemap.iter() if node.tag.endswith('loc')]
-    check(len(urls) == len(set(urls)) == expected_count + 6,
+    check(len(urls) == len(set(urls)) == expected_count + 5,
           'sitemap URL count/uniqueness')
     for url in urls:
         parsed = urlparse(url)
@@ -184,7 +193,7 @@ def main(expected_count: int) -> None:
           f'{sum(m == "長版" for m in mode_by_code.values())} long; '
           f'MI-12 short; 17 baseline additions; 23 filters; {expected_count} URLs')
     print('PASS: bilingual clause hashes, SEO head/H1, deep-link targets, no legacy service data')
-    print(f'PASS: {expected_count + 6} unique sitemap URLs, local assets, no stray <')
+    print(f'PASS: {expected_count + 5} unique sitemap URLs, local assets, no stray <')
 
 
 if __name__ == '__main__':
