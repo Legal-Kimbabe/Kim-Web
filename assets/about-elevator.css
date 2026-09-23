@@ -43,3 +43,24 @@
 .ae-stage.is-inside-rf .ae-panel{transform:translate(130%, -50%);transition:transform .65s ease}.ae-stage.is-inside-rf .ae-rf-room{transform:scale(1.08);transform-origin:center;transition:transform .7s ease}.ae-stage.is-inside-rf .ae-enter{display:none}
 @media(max-width:700px){#about-elevator-prototype{min-height:78vh}.ae-stage{min-height:720px}.ae-panel{right:8px;width:76px;padding:18px 9px}.ae-button{width:50px;height:50px}.ae-floor-copy{left:18px;right:94px;bottom:24px}.ae-rf-room{inset:5% 82px 5% 10px}.ae-rf-brand{top:11%;left:43%;width:75%}.ae-rf-brand span{font-size:12px}.ae-desk{left:22%;right:8%;bottom:18%}.ae-tribute{right:7%;top:28%;width:110px;height:150px}.ae-typewriter{right:5%;bottom:12%;width:86px;height:58px}.ae-cat{left:10%;bottom:9%;width:110px}.ae-credentials{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.ae-floor,.ae-door,.ae-stage.is-inside-rf .ae-panel,.ae-stage.is-inside-rf .ae-rf-room{transition-duration:.01ms!important}}
+
+/* prototype pass 2: elevator framing + floor-specific presentation */
+.ae-stage:before{content:"";position:absolute;inset:0;z-index:7;pointer-events:none;box-shadow:inset 0 0 0 18px #171717,inset 0 0 0 22px #625847,inset 0 0 120px #000}
+.ae-floor-p3{background-position:center 38%}
+.ae-floor-p3:after{content:"P3";position:absolute;left:6%;top:12%;font:800 20px/1 monospace;letter-spacing:.18em;color:#d8e2e6;text-shadow:0 2px 12px #000}
+.ae-floor-p2:before{content:"ABOUT US";position:absolute;left:8%;top:13%;padding:10px 15px;border:2px solid #b78a45;background:#231d16;color:#e8c27d;font:700 16px/1 Georgia,serif;letter-spacing:.18em;box-shadow:0 0 18px #c98e3433}
+.ae-p2-wall{position:absolute;inset:17% 14% 14% 13%;display:grid;grid-template-columns:1fr 1fr;gap:4%;align-items:center}
+.ae-p2-board{height:70%;border:1px solid #77716a;background:linear-gradient(#403f3b,#262725);box-shadow:0 18px 40px #0008,inset 0 0 0 5px #1d1d1c}
+.ae-p2-board:before{content:"";display:block;width:72%;height:2px;margin:22% auto 0;background:#d1a557;box-shadow:0 18px 0 #6e6a63,0 36px 0 #6e6a63,0 54px 0 #6e6a63}
+.ae-floor-rf:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,.36));pointer-events:none}
+.ae-rf-window{position:absolute;left:5%;top:8%;width:27%;height:46%;border:9px solid #27231f;background:linear-gradient(#52616a,#c18b55 65%,#252321 66%);box-shadow:0 0 45px #b8753840}
+.ae-rf-window:after{content:"";position:absolute;left:50%;top:0;bottom:0;width:4px;background:#27231f}
+.ae-rf-sofa{position:absolute;left:7%;bottom:20%;width:25%;height:18%;border-radius:18px 18px 6px 6px;background:#5b3d2d;box-shadow:0 20px 35px #0008}
+.ae-floor-p3 .ae-floor-copy{background:rgba(7,11,13,.72)}
+.ae-floor-p2 .ae-floor-copy{left:auto;right:15%;bottom:7%;max-width:350px}
+.ae-stage[data-floor="P3"] .ae-panel,.ae-stage[data-floor="P2"] .ae-panel,.ae-stage[data-floor="RF"] .ae-panel{transition:transform .55s ease}
+.ae-stage.is-inside-rf .ae-floor-rf{transform:scale(1.06) translateY(-1%)}
+.ae-stage.is-inside-rf .ae-rf-brand{transform:translateX(-50%) scale(1.04)}
+#about-elevator-prototype.lamp-off .ae-floor-rf{filter:brightness(.68)}
+#about-elevator-prototype.lamp-off .ae-lamp{filter:brightness(.35)}
+@media(max-width:700px){.ae-p2-wall{inset:15% 88px 22% 18px;grid-template-columns:1fr;gap:12px}.ae-p2-board{height:100%}.ae-floor-p2:before{left:22px;top:9%}.ae-rf-window{left:4%;width:35%;height:38%}.ae-rf-sofa{left:5%;width:34%}}
