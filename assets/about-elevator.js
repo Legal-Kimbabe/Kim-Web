@@ -27,9 +27,5 @@
  root.querySelector('.ae-lamp').addEventListener('click',()=>root.classList.toggle('lamp-off'));
  root.querySelector('.ae-typewriter').addEventListener('click',e=>{const seq=['§','§ K','§ KI','§ KIM'];let i=+e.currentTarget.dataset.i||0;const value=seq[i];e.currentTarget.dataset.i=(i+1)%seq.length;e.currentTarget.setAttribute('aria-label','打字機 '+value);status.textContent=value;const paper=root.querySelector('.ae-type-paper');paper.textContent=value;paper.classList.add('is-visible')});
  root.querySelector('.ae-cat').addEventListener('click',e=>{catState++;const belly=catState%2===1;e.currentTarget.classList.toggle('is-belly',belly);status.textContent=belly?'地瓜翻肚 ♡':'喵～';try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){const ac=new AC(),o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(520,ac.currentTime);o.frequency.exponentialRampToValueAtTime(330,ac.currentTime+.16);g.gain.setValueAtTime(.025,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.18);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.18);}}catch(_){}});
- root.querySelector('.ae-p2-open').addEventListener('click',()=>{
-  const panels=[...document.querySelectorAll('#about .team-photo-panel')];
-  openModal('<div class="ae-credentials">'+panels.map(p=>'<article class="ae-credential">'+p.innerHTML+'</article>').join('')+'</div>');
- });
  root.querySelectorAll('.ae-p3-open,.ae-p3-hint').forEach(el=>el.addEventListener('click',()=>p3Close.classList.add('is-open'))); p3Close.addEventListener('click',()=>p3Close.classList.remove('is-open'));
 })();
