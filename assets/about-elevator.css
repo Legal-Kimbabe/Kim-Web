@@ -267,3 +267,19 @@
 .ae-p2-board-content:empty{opacity:0}
 .ae-p2-board-content:not(:empty){opacity:1}
 @media(prefers-reduced-motion:reduce){.ae-stage:after{animation:none;opacity:0}.ae-back-to-lift{animation:none!important}}
+
+
+/* locked elevator entry: closed first frame -> choose floor -> recenter -> open */
+.ae-stage.is-closed .ae-door.left,
+.ae-stage.is-closed .ae-door.right{transform:translateX(0)}
+.ae-stage.is-closed .ae-floor{opacity:0;pointer-events:none}
+.ae-stage.is-closed .ae-status{opacity:0}
+.ae-stage.is-looking-panel .ae-panel{transform:translateX(-10px) rotateY(-7deg)}
+.ae-stage.is-moving .ae-panel{transform:translateX(12px) rotateY(-2deg)}
+.ae-stage.is-moving .ae-floor{opacity:.18}
+@media(max-width:700px){
+ .ae-stage.is-looking-panel .ae-panel{transform:translateX(-6px) rotateY(-5deg)}
+}
+@media(prefers-reduced-motion:reduce){
+ .ae-stage.is-looking-panel .ae-panel,.ae-stage.is-moving .ae-panel{transform:none}
+}
