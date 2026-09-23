@@ -1,0 +1,32 @@
+(function(){
+ const root=document.getElementById('about-elevator-prototype'); if(!root)return;
+ const about=document.getElementById('about'); about&&about.classList.add('about-elevator-on');
+ const stage=root.querySelector('.ae-stage'), floors=[...root.querySelectorAll('.ae-floor')], buttons=[...root.querySelectorAll('.ae-button')];
+ const status=root.querySelector('.ae-status'), modal=root.querySelector('.ae-modal'), modalBody=root.querySelector('.ae-modal-body');
+ let floor='P3', moving=false, catState=0;
+ function setFloor(next){
+  if(moving||next===floor)return; moving=true; stage.classList.remove('is-inside-rf'); stage.classList.add('is-moving'); status.textContent='MOVING · '+next;
+  setTimeout(()=>{floor=next; floors.forEach(x=>x.classList.toggle('is-active',x.dataset.floor===floor));buttons.forEach(x=>x.classList.toggle('is-active',x.dataset.floor===floor));status.textContent=floor;},620);
+  setTimeout(()=>{stage.classList.remove('is-moving');moving=false;},1150);
+ }
+ buttons.forEach(b=>b.addEventListener('click',()=>setFloor(b.dataset.floor)));
+ function openModal(html){modalBody.innerHTML=html;modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');}
+ function closeModal(){modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');modalBody.innerHTML='';}
+ root.querySelector('.ae-modal-close').addEventListener('click',closeModal); modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+ root.querySelector('.ae-enter').addEventListener('click',()=>stage.classList.add('is-inside-rf'));
+ root.querySelector('.ae-dossier').addEventListener('click',()=>{
+  const src=document.querySelector('#about .about-intro-inner');
+  openModal('<h2>金法務在線</h2>'+(src?src.innerHTML:''));
+ });
+ root.querySelector('.ae-tribute').addEventListener('click',()=>openModal('<h2>LEGAL KIM</h2><p>Our little tribute to two unforgettable legal-and-crime dramas.</p><p><em>Inspired by the shows we love.</em><br><strong>Built for contracts we actually use.</strong></p>'));
+ root.querySelector('.ae-talk').addEventListener('click',()=>{location.href='mailto:Kim.Br35Ba56@gmail.com?subject=%5B%E5%85%8D%E8%B2%BB%E5%88%9D%E6%AD%A5%E8%AB%AE%E8%A9%A2%5D%20%E5%85%B6%E4%BB%96%E6%B3%95%E5%BE%8B%E9%9C%80%E6%B1%82'});
+ root.querySelector('.ae-lamp').addEventListener('click',()=>root.classList.toggle('lamp-off'));
+ root.querySelector('.ae-typewriter').addEventListener('click',e=>{const seq=['§','§ K','§ KI','§ KIM'];e.currentTarget.dataset.i=((+e.currentTarget.dataset.i||0)+1)%4;e.currentTarget.setAttribute('aria-label','打字機 '+seq[e.currentTarget.dataset.i]);status.textContent=seq[e.currentTarget.dataset.i]});
+ root.querySelector('.ae-cat').addEventListener('click',e=>{catState++;e.currentTarget.classList.toggle('is-belly',catState%2===1);status.textContent=catState%2?'地瓜翻肚 ♡':'喵～'});
+ root.querySelector('.ae-p2-open').addEventListener('click',()=>{
+  const panels=[...document.querySelectorAll('#about .team-photo-panel')];
+  openModal('<div class="ae-credentials">'+panels.map(p=>'<article class="ae-credential">'+p.innerHTML+'</article>').join('')+'</div>');
+ });
+ root.querySelector('.ae-p3-open').addEventListener('click',()=>openModal('<img src="/assets/extracted/img-eab760bff52607c6.webp" alt="團隊主視覺" style="display:block;width:100%;height:auto">'));
+})();
