@@ -197,7 +197,7 @@ body.draft-page-active #draft .td-info .draft-free { color: #c9beb0 !important; 
   #draft .td-quote { position: relative; top: auto; left: auto; margin: 20px 6% 0; font-size: 18px; line-height: 1.5; }
   #draft .td-quote::after { margin-top: 11px; width: 36px; }
   #draft .td-stage { width: 108%; margin: 6px 0 0 -4%; }
-  #draft .td-paper { --td-type-size: 13px; width: 60%; min-height: 135px; padding: 17px 14px 52px; }
+  #draft .td-paper { --td-type-size: 14px; width: 60%; min-height: 135px; padding: 17px 14px 52px; }
   #draft .td-paper[data-active="true"] { min-height: 287px; }
   #draft .td-paper h2 { margin-bottom: 5px; }
   #draft .td-paper-description { min-height: 0; }
