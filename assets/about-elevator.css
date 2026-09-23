@@ -283,3 +283,17 @@
 @media(prefers-reduced-motion:reduce){
  .ae-stage.is-looking-panel .ae-panel,.ae-stage.is-moving .ae-panel{transform:none}
 }
+
+
+/* locked P3 interaction: distant hold -> cinematic push -> original hero match cut */
+.ae-floor-p3{transform-origin:50% 48%}
+.ae-stage.is-p3-pushing .ae-floor-p3{transform:scale(1.085);transition:transform .9s cubic-bezier(.18,.7,.18,1);filter:brightness(.92)}
+.ae-stage.is-p3-pushing .ae-panel{opacity:.22;transform:translateX(34px)}
+.ae-stage.is-p3-pushing .ae-p3-open{opacity:0;pointer-events:none}
+.ae-p3-closeup{transition:opacity .48s ease,visibility 0s linear .48s}
+.ae-p3-closeup.is-open{transition:opacity .48s ease,visibility 0s;opacity:1;visibility:visible}
+.ae-p3-closeup img{transform:scale(1.015);transition:transform 2.2s cubic-bezier(.18,.7,.18,1)}
+.ae-p3-closeup.is-open img{transform:scale(1.075)}
+@media(prefers-reduced-motion:reduce){
+ .ae-stage.is-p3-pushing .ae-floor-p3,.ae-p3-closeup img,.ae-p3-closeup.is-open img{transform:none!important;transition-duration:.01ms!important}
+}
