@@ -171,3 +171,23 @@
 .ae-button{font-family:"Arial Narrow",Arial,sans-serif;font-weight:700;letter-spacing:.08em}
 .ae-button.is-active:after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;right:7px;top:7px;background:#d7a04a;box-shadow:0 0 7px #d7a04a}
 @media(max-width:700px){.ae-stage:before{box-shadow:inset 0 0 0 10px #171717,inset 0 0 0 13px #625847,inset 0 0 80px #000}.ae-panel:before{inset:-10px -8px}}
+
+/* prototype pass 7: mobile ergonomics + calmer cinematic UI */
+.ae-floor-copy h2:only-child{margin:0}
+.ae-floor-p3 .ae-floor-copy{background:transparent;padding:0;left:50%;bottom:8%;transform:translateX(-50%);width:auto}
+.ae-floor-p3 .ae-floor-copy h2{display:none}
+.ae-floor-p3 .ae-p3-open{position:static;transform:none;width:38px;height:38px;border-radius:50%;padding:0;border:1px solid rgba(220,226,226,.45);background:rgba(8,12,13,.42);color:#dce2e2;font-size:18px;opacity:.52}
+.ae-floor-p3 .ae-p3-open:hover{opacity:.9;background:rgba(8,12,13,.68)}
+.ae-status{font-family:"Arial Narrow",Arial,sans-serif;letter-spacing:.12em}
+.ae-modal-card{max-height:min(82vh,760px);overflow:auto;overscroll-behavior:contain}
+.ae-credential .team-photo-expertise{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}
+.ae-credential .team-photo-expertise span{display:block}
+@media(max-width:700px){
+ .ae-stage{min-height:calc(100svh - 64px)}
+ .ae-panel{right:18px}
+ .ae-button{min-width:46px;min-height:46px}
+ .ae-floor-p3 .ae-p3-open{width:44px;height:44px}
+ .ae-p2-wall{right:78px}
+ .ae-credential .team-photo-expertise{grid-template-columns:1fr}
+ .ae-modal-card{width:calc(100% - 24px);max-height:84svh}
+}
