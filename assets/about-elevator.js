@@ -6,10 +6,10 @@
  let floor='P3', moving=false, catState=0; stage.dataset.floor=floor; root.classList.add('is-awake');
  function setFloor(next){
   if(moving||next===floor)return; moving=true; p3Close.classList.remove('is-open'); stage.classList.remove('is-inside-rf'); stage.classList.add('is-moving'); status.textContent='MOVING · '+next;
-  setTimeout(()=>{floor=next; stage.dataset.floor=floor; floors.forEach(x=>x.classList.toggle('is-active',x.dataset.floor===floor));buttons.forEach(x=>x.classList.toggle('is-active',x.dataset.floor===floor));status.textContent=floor;},620);
+  setTimeout(()=>{floor=next; stage.dataset.floor=floor; floors.forEach(x=>x.classList.toggle('is-active',x.dataset.floor===floor));buttons.forEach(x=>{x.classList.toggle('is-active',x.dataset.floor===floor);x.setAttribute('aria-pressed',x.dataset.floor===floor?'true':'false')});status.textContent=floor;},620);
   setTimeout(()=>{stage.classList.remove('is-moving');moving=false;},1220);
  }
- buttons.forEach(b=>b.addEventListener('click',()=>setFloor(b.dataset.floor)));
+ buttons.forEach(b=>b.addEventListener('click',()=>setFloor(b.dataset.floor))); buttons.forEach(b=>b.setAttribute('aria-pressed',b.dataset.floor===floor?'true':'false'));
  const sourcePanels=[...document.querySelectorAll('#about .team-photo-panel')];
  root.querySelectorAll('.ae-p2-person').forEach((board,i)=>{const target=board.querySelector('.ae-p2-board-content');if(sourcePanels[i])target.innerHTML=sourcePanels[i].innerHTML;board.addEventListener('click',()=>{if(sourcePanels[i])openModal('<article class="ae-credential">'+sourcePanels[i].innerHTML+'</article>')})});
  function openModal(html){modalBody.innerHTML=html;modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');const close=root.querySelector('.ae-modal-close');close&&close.focus({preventScroll:true});}
