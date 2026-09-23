@@ -2,7 +2,7 @@
  const root=document.getElementById('about-elevator-prototype'); if(!root)return;
  const about=document.getElementById('about'); about&&about.classList.add('about-elevator-on');
  const stage=root.querySelector('.ae-stage'), floors=[...root.querySelectorAll('.ae-floor')], buttons=[...root.querySelectorAll('.ae-button')];
- const status=root.querySelector('.ae-status'), modal=root.querySelector('.ae-modal'), modalBody=root.querySelector('.ae-modal-body');
+ const status=root.querySelector('.ae-status'), modal=root.querySelector('.ae-modal'), modalBody=root.querySelector('.ae-modal-body'), p3Close=root.querySelector('.ae-p3-closeup');
  let floor='P3', moving=false, catState=0; stage.dataset.floor=floor;
  function setFloor(next){
   if(moving||next===floor)return; moving=true; stage.classList.remove('is-inside-rf'); stage.classList.add('is-moving'); status.textContent='MOVING · '+next;
@@ -10,6 +10,8 @@
   setTimeout(()=>{stage.classList.remove('is-moving');moving=false;},1150);
  }
  buttons.forEach(b=>b.addEventListener('click',()=>setFloor(b.dataset.floor)));
+ const sourcePanels=[...document.querySelectorAll('#about .team-photo-panel')];
+ root.querySelectorAll('.ae-p2-person').forEach((board,i)=>{const target=board.querySelector('.ae-p2-board-content');if(sourcePanels[i])target.innerHTML=sourcePanels[i].innerHTML;board.addEventListener('click',()=>{if(sourcePanels[i])openModal('<article class="ae-credential">'+sourcePanels[i].innerHTML+'</article>')})});
  function openModal(html){modalBody.innerHTML=html;modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');}
  function closeModal(){modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');modalBody.innerHTML='';}
  root.querySelector('.ae-modal-close').addEventListener('click',closeModal); modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});
@@ -29,5 +31,5 @@
   const panels=[...document.querySelectorAll('#about .team-photo-panel')];
   openModal('<div class="ae-credentials">'+panels.map(p=>'<article class="ae-credential">'+p.innerHTML+'</article>').join('')+'</div>');
  });
- root.querySelectorAll('.ae-p3-open,.ae-p3-hint').forEach(el=>el.addEventListener('click',()=>openModal('<img src="/assets/extracted/img-eab760bff52607c6.webp" alt="團隊主視覺" style="display:block;width:100%;height:auto">')));
+ root.querySelectorAll('.ae-p3-open,.ae-p3-hint').forEach(el=>el.addEventListener('click',()=>p3Close.classList.add('is-open'))); p3Close.addEventListener('click',()=>p3Close.classList.remove('is-open'));
 })();
