@@ -191,3 +191,18 @@
  .ae-credential .team-photo-expertise{grid-template-columns:1fr}
  .ae-modal-card{width:calc(100% - 24px);max-height:84svh}
 }
+
+/* prototype pass 8: clean interaction language and scene depth */
+.ae-floor-copy p:empty{display:none}
+.ae-floor-p3 .ae-floor-copy{z-index:9}
+.ae-p2-board{appearance:none;border-radius:1px;text-align:left}
+.ae-p2-board-content{pointer-events:none}
+.ae-rf-room:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(112deg,rgba(255,210,145,.05),transparent 32%),radial-gradient(circle at 75% 28%,rgba(205,151,80,.08),transparent 28%)}
+.ae-stage.is-inside-rf .ae-rf-room{transform:scale(1.075) translateY(-1.2%)}
+.ae-stage.is-inside-rf .ae-panel{transform:translateX(115%);opacity:0;pointer-events:none}
+.ae-panel{transition:transform .55s ease,opacity .35s ease}
+.ae-back-to-lift{backdrop-filter:blur(5px)}
+.ae-modal{backdrop-filter:blur(7px)}
+.ae-modal-card{box-shadow:0 28px 90px #000c}
+.ae-p3-closeup.is-open~.ae-panel{opacity:0;pointer-events:none}
+@media(max-width:700px){.ae-stage.is-inside-rf .ae-rf-room{transform:scale(1.04)}.ae-rf-brand span{font-size:10px;line-height:1.55}}
