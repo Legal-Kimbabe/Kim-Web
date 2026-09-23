@@ -11,6 +11,13 @@ html.editorial-header-mounted .main-nav {
   display: none !important;
 }
 
+/* Service pages retain legacy markup for their existing page scripts. Hide its
+   original landing hero before JavaScript runs so Safari cannot snapshot it
+   during a navigation. ClauseBank's canonical landing keeps its own hero. */
+body:not(.linked-clausebank) > header.hero {
+  display: none !important;
+}
+
 .editorial-site-header {
   position: relative;
   z-index: 1502;

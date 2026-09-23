@@ -2683,7 +2683,9 @@ body.review-page-active header.hero{
   }
 
 </style>
-<link rel="stylesheet" href="/assets/drafting-typewriter.css?v=20260923g"/>
+<script>document.documentElement.classList.add('drafting-machine-pending');</script>
+<link rel="preload" as="image" href="/assets/drafting-machine-sage.webp" type="image/webp" fetchpriority="high"/>
+<link rel="stylesheet" href="/assets/drafting-typewriter.css?v=20260923h"/>
 <noscript><style>#draft{display:block!important}#vault,header.hero{display:none!important}</style></noscript>
 
 <script type="application/ld+json">
@@ -2705,7 +2707,7 @@ body.review-page-active header.hero{
   "description": "提供簡式與完整契約撰寫服務，依文件內容、篇幅及案件複雜程度計價。"
 }
 </script>
-<link rel="stylesheet" href="/assets/editorial-header.css?v=20260923a"/>
+<link rel="stylesheet" href="/assets/editorial-header.css?v=20260923b"/>
 <script src="/assets/editorial-header.js?v=20260923a" defer></script>
 </head>
 <body>
@@ -2719,7 +2721,7 @@ body.review-page-active header.hero{
 <a class="nav-item" data-page="about" href="/about/"><span aria-hidden="true" class="icon icon-users"><svg role="img" viewbox="0 0 32 32"><circle cx="12" cy="11" r="4"></circle><circle cx="22" cy="12" r="3.2"></circle><path d="M4.5 25c.6-5 3.4-7.5 7.5-7.5s6.9 2.5 7.5 7.5M18.5 19c1-.9 2.2-1.4 3.7-1.4 3.2 0 5.3 2.3 5.5 6.2"></path></svg></span><span>關於我們 <small class="nav-en">About Us</small></span></a>
 </nav>
 <header class="hero">
-<img alt="Breaking Bad Contracts — Better Call Kim" src="/assets/extracted/img-1def41be78cba40d.webp"/>
+<img alt="Breaking Bad Contracts — Better Call Kim" src="/assets/extracted/img-1def41be78cba40d.webp" loading="lazy" fetchpriority="low" decoding="async"/>
 </header>
 <main>
 <section class="page active" id="vault"></section>
@@ -2728,8 +2730,8 @@ body.review-page-active header.hero{
     <div class="td-hero">
       <h2 class="td-title" aria-label="Drafting">DRAFTING</h2>
       <p class="td-quote"><span>我知道，</span><span>你下不了手。</span></p>
-      <img class="td-prop td-prop-documents" src="/assets/drafting-documents.png" alt="" aria-hidden="true" loading="lazy" decoding="async"/>
-      <img class="td-prop td-prop-coffee" src="/assets/drafting-coffee.png" alt="" aria-hidden="true" loading="lazy" decoding="async"/>
+      <img class="td-prop td-prop-documents" data-deferred-src="/assets/drafting-documents.webp" data-fallback-src="/assets/drafting-documents.png" alt="" aria-hidden="true" width="1254" height="1254" decoding="async"/>
+      <img class="td-prop td-prop-coffee" data-deferred-src="/assets/drafting-coffee.webp" data-fallback-src="/assets/drafting-coffee.png" alt="" aria-hidden="true" width="1254" height="1254" decoding="async"/>
       <div class="td-stage">
         <div class="td-paper" id="drafting-paper" data-active="false" aria-label="契約撰寫服務資料紙">
           <div class="td-paper-content" hidden>
@@ -2743,7 +2745,7 @@ body.review-page-active header.hero{
           </div>
         </div>
         <div class="td-body-wrap">
-          <img class="td-body-image" src="/assets/drafting-machine-sage.png" alt="淺青綠色復古打字機，鍵盤有紅色 TAB 鍵，紙張初始為空白" width="1385" height="1136" decoding="async"/>
+          <picture><source srcset="/assets/drafting-machine-sage.webp" type="image/webp"/><img class="td-body-image" data-drafting-machine src="/assets/drafting-machine-sage.png" alt="淺青綠色復古打字機，鍵盤有紅色 TAB 鍵，紙張初始為空白" width="1385" height="1136" decoding="async" fetchpriority="high"/></picture>
           <div class="td-keyboard" role="group" aria-label="按打字機上微亮的 W、C、J、P，查看四種契約撰寫服務">
             <button class="td-key" data-key="0" type="button" aria-label="按鍵 W：簡式契約" aria-controls="drafting-paper" aria-pressed="false"><span class="td-screenreader">簡式契約</span></button>
             <button class="td-key" data-key="1" type="button" aria-label="按鍵 C：完整契約" aria-controls="drafting-paper" aria-pressed="false"><span class="td-screenreader">完整契約</span></button>
@@ -2985,6 +2987,6 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 </script>
 
-<script src="/assets/drafting-typewriter.js?v=20260923c" defer></script>
+<script src="/assets/drafting-typewriter.js?v=20260923d" defer></script>
 </body>
 </html>

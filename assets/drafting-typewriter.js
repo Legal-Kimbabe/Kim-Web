@@ -2,6 +2,60 @@
   const draft = document.querySelector('#draft .td-shell');
   if (!draft) return;
 
+  const root = document.documentElement;
+  const machine = draft.querySelector('[data-drafting-machine]');
+  const props = Array.from(draft.querySelectorAll('[data-deferred-src]'));
+  let machineRevealed = false;
+  let propsHydrated = false;
+
+  function hydrateDesktopProps() {
+    if (propsHydrated || !window.matchMedia('(min-width: 601px)').matches) return;
+    propsHydrated = true;
+    props.forEach(prop => {
+      const fallback = prop.dataset.fallbackSrc;
+      const reveal = () => prop.classList.add('is-loaded');
+      const useFallback = () => {
+        if (!fallback || prop.dataset.usingFallback === 'true') return;
+        prop.dataset.usingFallback = 'true';
+        prop.addEventListener('load', reveal, { once: true });
+        prop.src = fallback;
+      };
+      prop.addEventListener('load', reveal, { once: true });
+      prop.addEventListener('error', useFallback, { once: true });
+      prop.src = prop.dataset.deferredSrc;
+      if (prop.complete && prop.naturalWidth) reveal();
+    });
+  }
+
+  function revealMachine() {
+    if (machineRevealed) return;
+    machineRevealed = true;
+    root.classList.remove('drafting-machine-pending');
+    draft.classList.add('td-machine-ready');
+    window.setTimeout(hydrateDesktopProps, 80);
+  }
+
+  function prepareMachine() {
+    if (!machine) {
+      revealMachine();
+      return;
+    }
+    const decodeAndReveal = () => {
+      if (typeof machine.decode === 'function') {
+        machine.decode().catch(() => {}).finally(revealMachine);
+      } else {
+        revealMachine();
+      }
+    };
+    if (machine.complete) decodeAndReveal();
+    else {
+      machine.addEventListener('load', decodeAndReveal, { once: true });
+      machine.addEventListener('error', revealMachine, { once: true });
+    }
+    // Never leave the composition hidden if a browser delays image decoding.
+    window.setTimeout(revealMachine, 4000);
+  }
+
   // Keep the four service descriptions and prices supplied for this page.
   const services = [
     {
@@ -129,6 +183,11 @@
   }
 
   clearPaper();
+  prepareMachine();
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) revealMachine();
+  });
+  window.addEventListener('resize', hydrateDesktopProps, { passive: true });
   keys.forEach((key, index) => key.addEventListener('click', () => select(index)));
   resetKey?.addEventListener('click', () => {
     ++generation;
