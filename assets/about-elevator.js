@@ -15,7 +15,7 @@
  function openModal(html){modalBody.innerHTML=html;modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');const close=root.querySelector('.ae-modal-close');close&&close.focus({preventScroll:true});}
  function closeModal(){modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');modalBody.innerHTML='';}
  root.querySelector('.ae-modal-close').addEventListener('click',closeModal); modal.addEventListener('click',e=>{if(e.target===modal)closeModal()});
- document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(modal.classList.contains('is-open'))closeModal();else if(p3Close.classList.contains('is-open'))p3Close.classList.remove('is-open');else if(stage.classList.contains('is-inside-rf'))stage.classList.remove('is-inside-rf')}});
  root.querySelector('.ae-floor-rf .ae-enter').addEventListener('click',()=>stage.classList.add('is-inside-rf'));
  root.querySelector('.ae-back-to-lift').addEventListener('click',()=>stage.classList.remove('is-inside-rf'));
  root.querySelector('.ae-dossier').addEventListener('click',()=>{
