@@ -253,3 +253,17 @@
 .ae-modal-close{border-radius:50%}
 .ae-p3-open{backdrop-filter:blur(3px)}
 @media(max-width:700px){.ae-floor-rf>.ae-enter{bottom:18px}.ae-status{font-size:11px}}
+
+/* prototype pass 13: loading stability + final pre-preview states */
+#about.about-elevator-on>.about-page{display:none!important}
+#about-elevator-prototype{min-height:100svh}
+.ae-stage{contain:layout paint}
+.ae-floor img{display:block}
+.ae-p3-closeup img{background:#080a0b}
+.ae-modal[aria-hidden="true"]{pointer-events:none}
+.ae-modal[aria-hidden="false"]{pointer-events:auto}
+.ae-button[aria-pressed="true"]{cursor:default}
+.ae-stage.is-moving .ae-button{cursor:wait}
+.ae-p2-board-content:empty{opacity:0}
+.ae-p2-board-content:not(:empty){opacity:1}
+@media(prefers-reduced-motion:reduce){.ae-stage:after{animation:none;opacity:0}.ae-back-to-lift{animation:none!important}}
