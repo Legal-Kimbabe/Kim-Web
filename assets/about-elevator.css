@@ -243,3 +243,13 @@
 @keyframes aeReturnIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
 .ae-p2-board-content .team-photo-kicker,.ae-p2-board-content .team-photo-title,.ae-p2-board-content .team-photo-expertise,.ae-p2-board-content .team-photo-credentials{pointer-events:none}
 @media(max-width:420px){.ae-panel{right:12px}.ae-button{min-width:43px;min-height:43px}.ae-p2-wall{right:68px;left:12px}.ae-rf-brand{max-width:54%}}
+
+/* prototype pass 12: remove remaining prototype chrome */
+.ae-status{background:rgba(7,8,8,.38);border:1px solid rgba(170,150,112,.12);backdrop-filter:blur(4px)}
+.ae-stage:not(.is-moving) .ae-status{background:transparent;border-color:transparent;backdrop-filter:none}
+.ae-floor-rf>.ae-enter{border:1px solid rgba(218,186,136,.32);background:rgba(10,9,8,.48);backdrop-filter:blur(4px);letter-spacing:.08em}
+.ae-floor-rf>.ae-enter:hover{border-color:rgba(218,186,136,.62)}
+.ae-modal-card{border:1px solid rgba(182,157,112,.24)}
+.ae-modal-close{border-radius:50%}
+.ae-p3-open{backdrop-filter:blur(3px)}
+@media(max-width:700px){.ae-floor-rf>.ae-enter{bottom:18px}.ae-status{font-size:11px}}
