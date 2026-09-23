@@ -233,3 +233,13 @@
 .ae-stage.is-moving .ae-p2-board-content{opacity:.2}
 .ae-stage.is-inside-rf .ae-status{opacity:0}
 @media(max-width:700px){.ae-modal-body{font-size:14px}.ae-modal-body h2{font-size:20px}}
+
+/* prototype pass 11: final pre-preview cleanup */
+.ae-stage button{-webkit-tap-highlight-color:transparent}
+.ae-button,.ae-back-to-lift,.ae-p3-open{user-select:none}
+.ae-modal-close{position:sticky;top:0;float:right;z-index:3}
+.ae-modal-body:after{content:"";display:block;clear:both}
+.ae-stage.is-inside-rf .ae-back-to-lift{animation:aeReturnIn .35s ease both}
+@keyframes aeReturnIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.ae-p2-board-content .team-photo-kicker,.ae-p2-board-content .team-photo-title,.ae-p2-board-content .team-photo-expertise,.ae-p2-board-content .team-photo-credentials{pointer-events:none}
+@media(max-width:420px){.ae-panel{right:12px}.ae-button{min-width:43px;min-height:43px}.ae-p2-wall{right:68px;left:12px}.ae-rf-brand{max-width:54%}}
