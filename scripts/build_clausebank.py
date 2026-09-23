@@ -140,6 +140,7 @@ def build() -> None:
     source_text = SOURCE.read_text(encoding='utf-8')
     filters, originals = source_parts(source_text)
     source_codes = [code(item) for item in originals]
+# Root and /clausebank/ intentionally share one canonical ClauseBank data source.
     landing_path = ROOT / 'clausebank/index.html'
     landing = landing_path.read_text(encoding='utf-8')
     landing_out = versioned_script(replace_cards(replace_filters(landing, filters), originals))
