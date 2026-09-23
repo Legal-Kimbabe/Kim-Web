@@ -140,34 +140,18 @@ def build() -> None:
     source_text = SOURCE.read_text(encoding='utf-8')
     filters, originals = source_parts(source_text)
     source_codes = [code(item) for item in originals]
-    home_path = ROOT / 'index.html'
-    home = home_path.read_text(encoding='utf-8')
-    current = {code(item): item for item in cards(home)}
-    if len(current) != len(cards(home)):
-        raise ValueError("homepage duplicate card code")
-    canonical_by_code = dict(zip(source_codes, originals))
-    # Homepage has an established, independently approved presentation order.
-    # Retain it for existing cards; a new card is appended until its intended
-    # position is explicitly encoded in the canonical source.
-    order_match = re.search(r'<!-- homepage-order: ([A-Z0-9,-]+) -->', source_text)
-    if not order_match:
-        raise ValueError('canonical source must record homepage presentation order')
-    known_home_order = order_match.group(1).split(',')
-    if len(known_home_order) != len(set(known_home_order)):
-        raise ValueError('duplicate homepage order code')
-    home_codes = [c for c in known_home_order if c in canonical_by_code]
-    home_codes += [c for c in source_codes if c not in home_codes]
-    rendered = [home_card(current[c], canonical_by_code[c]) if c in current
-                else canonical_by_code[c] for c in home_codes]
-    home_out = versioned_script(replace_cards(replace_filters(home, filters), rendered))
-    if home_out != home:
-        home_path.write_text(home_out, encoding='utf-8')
-
+# Root and /clausebank/ intentionally share one canonical ClauseBank data source.
     landing_path = ROOT / 'clausebank/index.html'
     landing = landing_path.read_text(encoding='utf-8')
     landing_out = versioned_script(replace_cards(replace_filters(landing, filters), originals))
     if landing_out != landing:
         landing_path.write_text(landing_out, encoding='utf-8')
+
+    home_path = ROOT / 'index.html'
+    home = home_path.read_text(encoding='utf-8')
+    home_out = versioned_script(replace_cards(replace_filters(home, filters), originals))
+    if home_out != home:
+        home_path.write_text(home_out, encoding='utf-8')
 
     expected_paths = {re.search(r'href="(/clausebank/[^\"]+/)"', item).group(1): item
                       for item in originals}
