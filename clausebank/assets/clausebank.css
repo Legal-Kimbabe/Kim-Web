@@ -827,3 +827,19 @@ body.bilingual-mode #vault .pizza-en{margin-top:15px;padding-top:15px;border-top
 .back-to-top,
     .back-to-top-plate{transition:none;}
 }
+
+/* === ClauseBank approved v5 Hero + toolbar proportions === */
+body.linked-clausebank header.hero{
+  display:block!important;width:min(1116px,calc(90vw - 44px))!important;height:auto!important;
+  min-height:0!important;margin:0 auto!important;padding:16px 0 0!important;overflow:hidden!important;
+}
+body.linked-clausebank header.hero img{
+  display:block!important;width:100%!important;height:auto!important;object-fit:contain!important;
+  object-position:center!important;margin-top:-5.7%!important;margin-bottom:-.5%!important;
+}
+#vault .toolbar{width:100%;max-width:1080px;margin-left:auto;margin-right:auto;}
+@media(max-width:700px){
+  body.linked-clausebank header.hero{width:100%!important;padding-top:0!important;overflow:hidden!important;}
+  body.linked-clausebank header.hero img{width:100%!important;height:auto!important;margin-top:-5.7%!important;margin-bottom:0!important;}
+  #vault .toolbar{max-width:1080px;padding-left:14px;padding-right:14px;}
+}

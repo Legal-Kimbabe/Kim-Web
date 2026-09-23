@@ -339,3 +339,24 @@ var SUPABASE_PUBLISHABLE_KEY='sb_publishable_V-GBA8xcWu3h9aMjLk5JuA_2LX_KzkJ';
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',focusClause);
   else focusClause();
 })();
+
+(function(){
+  function initEditorialServiceMenu(){
+    var button=document.querySelector('.editorial-service-toggle');
+    var overlay=document.getElementById('editorialServiceOverlay');
+    if(!button||!overlay) return;
+    function setOpen(open){
+      button.setAttribute('aria-expanded',String(open));
+      button.innerHTML=open?'NO THX <sup>−</sup>':'SERVICE<sup>+</sup>';
+      overlay.hidden=false;
+      overlay.classList.toggle('is-open',open);
+      document.body.classList.toggle('editorial-menu-open',open);
+      if(!open) setTimeout(function(){if(!overlay.classList.contains('is-open')) overlay.hidden=true;},210);
+    }
+    button.addEventListener('click',function(){setOpen(button.getAttribute('aria-expanded')!=='true');});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&button.getAttribute('aria-expanded')==='true'){setOpen(false);button.focus();}});
+    overlay.addEventListener('click',function(e){if(e.target===overlay)setOpen(false);});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initEditorialServiceMenu);
+  else initEditorialServiceMenu();
+})();

@@ -24,8 +24,13 @@ FILTERS = '<div class="filters">'
 def versioned_script(page: str) -> str:
     """Content-address the one shared implementation to avoid stale CDN JS."""
     version = hashlib.sha256((ROOT / 'clausebank/assets/clausebank.js').read_bytes()).hexdigest()[:12]
-    return re.sub(r'(src="(?:/clausebank/assets/|(?:\.\./)?assets/)clausebank\.js)(?:\?v=[^"]*)?("\s*>)',
+    page = re.sub(r'(src="(?:/clausebank/assets/|(?:\.\./)?assets/)clausebank\.js)(?:\?v=[^"]*)?("\s*>)',
                   lambda match: match.group(1) + '?v=' + version + match.group(2), page)
+    if '/assets/editorial-header.css' not in page:
+        shared_header = ('<link rel="stylesheet" href="/assets/editorial-header.css?v=20260923a"/>\n'
+                         '<script src="/assets/editorial-header.js?v=20260923a" defer></script>\n')
+        page = page.replace('</head>', shared_header + '</head>', 1)
+    return page
 
 
 def cards(text: str) -> list[str]:
