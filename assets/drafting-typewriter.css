@@ -32,8 +32,8 @@ body.draft-page-active #draft {
   top: 245px;
   margin: 0;
   color: #f3e2cf;
-  font: 400 clamp(19px, 1.55vw, 23px)/1.72 "Songti TC", "STSong", "Noto Serif TC", serif;
-  letter-spacing: .1em;
+  font: 300 clamp(17px, 1.3vw, 18px)/1.85 "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  letter-spacing: .14em;
   text-shadow: 0 1px 1px #190b07a6, 0 3px 12px #160a078c;
 }
 #draft .td-quote span { display: block; }
@@ -181,7 +181,7 @@ body.draft-page-active #draft .td-info .draft-free { color: #c9beb0 !important; 
 
 @media (max-width: 800px) {
   #draft .td-title { font-size: clamp(87px, 16vw, 130px); }
-  #draft .td-quote { top: 260px; font-size: 20px; }
+  #draft .td-quote { top: 260px; font-size: 17px; }
   #draft .td-hero-contact { top: 270px; right: clamp(40px, 7vw, 72px); left: auto; }
   #draft .td-stage { width: 82vw; margin-right: auto; }
   #draft .td-paper { padding: 25px 25px 45px; }
@@ -202,7 +202,7 @@ body.draft-page-active #draft .td-info .draft-free { color: #c9beb0 !important; 
 @media (max-width: 600px) {
   #draft .td-hero { min-height: 0; padding: 38px 0 14px; background-size: 520px auto; }
   #draft .td-title { font-size: clamp(57px, 17.1vw, 100px); letter-spacing: .005em; }
-  #draft .td-quote { position: relative; top: auto; left: auto; margin: 20px 6% 0; font-size: 18px; line-height: 1.5; }
+  #draft .td-quote { position: relative; top: auto; left: auto; margin: 20px 6% 0; font-size: 15.5px; line-height: 1.7; }
   #draft .td-quote::after { margin-top: 11px; width: 36px; }
   #draft .td-stage { width: 108%; margin: 6px 0 0 -4%; }
   #draft .td-paper { --td-type-size: 14px; width: 60%; min-height: 135px; padding: 17px 14px 52px; }
