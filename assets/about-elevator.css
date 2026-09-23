@@ -221,3 +221,15 @@
 .ae-rf-room button{touch-action:manipulation}
 .ae-rf-brand{pointer-events:none}
 @media(hover:none){.ae-object:hover,.ae-p2-board:hover{filter:none;transform:none}}
+
+/* prototype pass 10: transition timing + modal readability */
+.ae-modal-body{line-height:1.7}
+.ae-modal-body .team-photo-title{margin:.35rem 0 .8rem}
+.ae-modal-body .team-photo-rule{height:1px;background:#8f7650;margin:1rem 0}
+.ae-modal-body .team-photo-credentials{opacity:.78}
+.ae-stage.is-moving .ae-status{letter-spacing:.16em}
+.ae-stage.is-moving .ae-floor.is-active{filter:brightness(.65)}
+.ae-p2-board-content{transition:opacity .25s ease}
+.ae-stage.is-moving .ae-p2-board-content{opacity:.2}
+.ae-stage.is-inside-rf .ae-status{opacity:0}
+@media(max-width:700px){.ae-modal-body{font-size:14px}.ae-modal-body h2{font-size:20px}}
