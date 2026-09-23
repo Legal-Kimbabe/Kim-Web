@@ -85,3 +85,17 @@
 .ae-p3-hint:focus-visible{outline:2px solid #d99a35;outline-offset:-8px}
 .ae-p3-hint span{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);padding:7px 10px;background:#0b1012aa;border:1px solid #6c777a;color:#d8e2e6;font-size:12px;letter-spacing:.1em;opacity:.72}
 @media(max-width:700px){.ae-back-to-lift{left:12px;top:14px}.ae-type-paper{right:4%;bottom:21%;width:96px;font-size:13px}.ae-p3-hint span{bottom:16%;font-size:10px}}
+
+.ae-stage.is-moving .ae-panel{pointer-events:none}
+.ae-object{transition:filter .2s ease,transform .2s ease,box-shadow .2s ease}
+.ae-object:hover{filter:brightness(1.12)}
+.ae-dossier:hover{transform:rotate(-3deg) translateY(-3px)}
+.ae-talk:hover{box-shadow:0 0 16px rgba(215,155,66,.25)}
+.ae-typewriter:hover{transform:translateY(-2px)}
+.ae-cat{transition:transform .35s ease,height .35s ease,filter .2s ease}
+.ae-cat:hover{filter:brightness(1.08)}
+.ae-back-to-lift{position:absolute;left:22px;top:22px;z-index:14;display:none;border:1px solid #7b6b52;background:#111b;color:#e8d4b1;padding:9px 12px;cursor:pointer;letter-spacing:.08em}
+.ae-stage.is-inside-rf .ae-back-to-lift{display:block}
+.ae-type-paper{position:absolute;right:9%;bottom:24%;width:128px;min-height:52px;padding:9px;background:#e8dfca;color:#161616;font:700 17px/1.3 "Courier New",monospace;transform:rotate(-1deg);opacity:0;transition:opacity .2s ease}
+.ae-type-paper.is-visible{opacity:1}
+@media(max-width:700px){.ae-back-to-lift{left:12px;top:14px}.ae-type-paper{right:4%;bottom:21%;width:96px;font-size:13px}}
