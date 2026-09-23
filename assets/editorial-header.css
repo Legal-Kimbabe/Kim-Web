@@ -1,0 +1,265 @@
+@font-face {
+  font-family: "League Gothic";
+  src: url("/clausebank/assets/fonts/LeagueGothic-wdth.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+html.editorial-header-mounted .top-brand,
+html.editorial-header-mounted .main-nav {
+  display: none !important;
+}
+
+.editorial-site-header {
+  position: relative;
+  z-index: 1502;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(1116px, calc(90vw - 44px));
+  height: 58px;
+  margin: 0 auto;
+  background: #f3f0e8;
+  color: #171512;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.editorial-brand {
+  flex: none;
+  color: #171512;
+  font: 400 clamp(23px, 2.3vw, 30px)/1 "League Gothic", sans-serif;
+  letter-spacing: 2.1px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.editorial-desktop-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(740px, 72%);
+  min-width: 0;
+  gap: clamp(13px, 1.5vw, 23px);
+}
+
+.editorial-desktop-nav a {
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 3px;
+  color: #211f1c;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.editorial-desktop-nav a span,
+.editorial-desktop-nav a small {
+  display: block;
+}
+
+.editorial-desktop-nav a span {
+  color: #746e67;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: clamp(11px, .88vw, 13px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: .07em;
+}
+
+.editorial-desktop-nav a small {
+  margin: 0;
+  color: #211f1c;
+  font: 400 clamp(13px, 1.22vw, 17px)/.92 "League Gothic", sans-serif;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.editorial-desktop-nav a.is-current span,
+.editorial-desktop-nav a.is-current small {
+  color: #c65347;
+}
+
+.editorial-desktop-nav a:hover small,
+.editorial-desktop-nav a:focus-visible small {
+  color: #c65347;
+}
+
+.editorial-desktop-nav a:focus-visible,
+.editorial-brand:focus-visible {
+  outline: 2px solid #c65347;
+  outline-offset: 4px;
+}
+
+.editorial-service-toggle,
+.editorial-service-overlay {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .editorial-site-header {
+    width: 100%;
+    height: 40px;
+    padding: 0 18px;
+  }
+
+  .editorial-brand {
+    font-size: 20px;
+    letter-spacing: 2px;
+  }
+
+  .editorial-desktop-nav {
+    display: none;
+  }
+
+  .editorial-service-toggle {
+    display: block;
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #171512;
+    cursor: pointer;
+    font: 400 17px/1 "League Gothic", sans-serif;
+    letter-spacing: 1.8px;
+    white-space: nowrap;
+  }
+
+  .editorial-service-toggle sup {
+    position: relative;
+    top: -.12em;
+    margin-left: 1px;
+    font: inherit;
+  }
+
+  .editorial-service-toggle:focus-visible {
+    outline: 2px solid #cc766d;
+    outline-offset: 4px;
+  }
+
+  body.editorial-menu-open {
+    overflow: hidden;
+  }
+
+  body.editorial-menu-open .editorial-site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    width: 100%;
+  }
+
+  .editorial-service-overlay {
+    position: fixed;
+    z-index: 1501;
+    inset: 40px 0 0;
+    display: block;
+    overflow: hidden;
+    background: rgba(4, 7, 8, .55);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    transition: opacity .2s ease, visibility .2s ease;
+  }
+
+  .editorial-service-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .editorial-service-menu {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: min(86vw, 430px);
+    min-height: 100%;
+    margin-left: auto;
+    padding: clamp(70px, 11vh, 104px) clamp(38px, 10vw, 54px) 58px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 78% 38%, rgba(37, 126, 139, .33), transparent 19%),
+      radial-gradient(circle at 23% 74%, rgba(143, 49, 31, .28), transparent 25%),
+      linear-gradient(145deg, rgba(7, 16, 19, .94) 0%, rgba(12, 23, 26, .94) 48%, rgba(4, 7, 8, .95) 100%);
+    box-shadow: -22px 0 58px rgba(0, 0, 0, .42);
+    transform: translateX(28px);
+    backdrop-filter: blur(12px) saturate(.82);
+    -webkit-backdrop-filter: blur(12px) saturate(.82);
+    transition: transform .28s cubic-bezier(.2, .72, .2, 1);
+  }
+
+  .editorial-service-overlay.is-open .editorial-service-menu {
+    transform: translateX(0);
+  }
+
+  .editorial-service-menu::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .72;
+    mix-blend-mode: screen;
+    background:
+      linear-gradient(90deg, transparent 0 10%, rgba(107, 216, 219, .12) 10.15% 10.3%, transparent 10.45% 20%, rgba(237, 150, 109, .13) 20.15% 20.3%, transparent 20.45% 70%, rgba(87, 224, 220, .12) 70.15% 70.35%, transparent 70.5%),
+      repeating-linear-gradient(90deg, transparent 0 9vw, rgba(255, 255, 255, .025) 9.1vw 9.25vw, transparent 9.4vw 16vw);
+  }
+
+  .editorial-service-menu::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .16;
+    mix-blend-mode: screen;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+  }
+
+  .editorial-service-menu a {
+    position: relative;
+    z-index: 1;
+    display: block;
+    padding: 22px 0 21px;
+    color: #e9e1d4;
+    text-align: left;
+    text-decoration: none;
+  }
+
+  .editorial-service-menu span {
+    display: block;
+    font: 400 clamp(22px, 6vw, 28px)/1 "League Gothic", sans-serif;
+    letter-spacing: 2.2px;
+  }
+
+  .editorial-service-menu small {
+    display: block;
+    margin-top: 8px;
+    color: rgba(233, 225, 212, .72);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: .06em;
+  }
+
+  .editorial-service-menu a.is-current span,
+  .editorial-service-menu a.is-current small {
+    color: #d77e72;
+  }
+
+  .editorial-service-menu a:focus-visible {
+    outline: 2px solid #d77e72;
+    outline-offset: 4px;
+  }
+}
+
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
+  .editorial-service-overlay,
+  .editorial-service-menu {
+    transition: none;
+  }
+}
