@@ -5,7 +5,7 @@
  const status=root.querySelector('.ae-status'), modal=root.querySelector('.ae-modal'), modalBody=root.querySelector('.ae-modal-body'), p3Close=root.querySelector('.ae-p3-closeup');
  let floor='P3', moving=false, catState=0; stage.dataset.floor=floor; root.classList.add('is-awake');
  function setFloor(next){
-  if(moving||next===floor)return; moving=true; p3Close.classList.remove('is-open'); stage.classList.remove('is-inside-rf'); stage.classList.add('is-moving'); status.textContent='MOVING · '+next;
+  if(moving||next===floor)return; moving=true; p3Close.classList.remove('is-open'); stage.classList.remove('is-inside-rf'); stage.classList.add('is-moving'); status.textContent='· '+next;
   setTimeout(()=>{floor=next; stage.dataset.floor=floor; floors.forEach(x=>x.classList.toggle('is-active',x.dataset.floor===floor));buttons.forEach(x=>{x.classList.toggle('is-active',x.dataset.floor===floor);x.setAttribute('aria-pressed',x.dataset.floor===floor?'true':'false')});status.textContent=floor;},620);
   setTimeout(()=>{stage.classList.remove('is-moving');moving=false;},1220);
  }
