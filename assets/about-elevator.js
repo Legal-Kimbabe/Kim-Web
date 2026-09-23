@@ -5,9 +5,9 @@
  const status=root.querySelector('.ae-status'), modal=root.querySelector('.ae-modal'), modalBody=root.querySelector('.ae-modal-body'), p3Close=root.querySelector('.ae-p3-closeup');
  let floor='P3', moving=false, catState=0; stage.dataset.floor=floor;
  function setFloor(next){
-  if(moving||next===floor)return; moving=true; stage.classList.remove('is-inside-rf'); stage.classList.add('is-moving'); status.textContent='MOVING · '+next;
+  if(moving||next===floor)return; moving=true; p3Close.classList.remove('is-open'); stage.classList.remove('is-inside-rf'); stage.classList.add('is-moving'); status.textContent='MOVING · '+next;
   setTimeout(()=>{floor=next; stage.dataset.floor=floor; floors.forEach(x=>x.classList.toggle('is-active',x.dataset.floor===floor));buttons.forEach(x=>x.classList.toggle('is-active',x.dataset.floor===floor));status.textContent=floor;},620);
-  setTimeout(()=>{stage.classList.remove('is-moving');moving=false;},1150);
+  setTimeout(()=>{stage.classList.remove('is-moving');moving=false;},1220);
  }
  buttons.forEach(b=>b.addEventListener('click',()=>setFloor(b.dataset.floor)));
  const sourcePanels=[...document.querySelectorAll('#about .team-photo-panel')];
