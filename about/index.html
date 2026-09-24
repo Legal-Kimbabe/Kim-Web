@@ -2698,7 +2698,7 @@ body.review-page-active header.hero{
 </script>
 <link rel="stylesheet" href="/assets/editorial-header.css?v=20260923a"/>
 <script src="/assets/editorial-header.js?v=20260923a" defer></script>
-<link rel="stylesheet" href="/assets/about-elevator.css?v=prototype1"/>\n</head>
+<link rel="stylesheet" href="/assets/about-elevator.css?v=about-elevator-v2"/>\n</head>
 <body>
 <h1 class="seo-site-title">關於我們｜律師與商務契約團隊｜金法務在線</h1>
 <div class="top-brand"><span class="top-brand-dot"></span><span class="top-brand-mark">§</span><span>金法務</span></div>
@@ -2759,25 +2759,27 @@ body.review-page-active header.hero{
   </div>
 </section>
 
-<section class="page" id="about">\n<div id="about-elevator-prototype" aria-label="About Us interactive elevator prototype">
+<section class="page" id="about">\n<div id="about-elevator-prototype" aria-label="About Us interactive elevator">
   <div class="ae-stage" tabindex="-1">
-    <div class="ae-status" aria-live="polite">P3</div><button class="ae-back-to-lift" type="button" aria-label="返回電梯">← 電梯</button>
+    <div class="ae-status" aria-live="polite"></div><button class="ae-back-to-lift" type="button" aria-label="返回電梯">← 電梯</button>
     <section class="ae-floor ae-floor-p3 is-active" data-floor="P3">
-      <div class="ae-floor-copy"><button class="ae-p3-open ae-enter" type="button" aria-label="靠近人物">＋</button></div>
+      <img class="ae-scene" src="/assets/about-elevator/p3-scene.webp" alt="從暖銅色電梯看向冷藍灰停車場的兩位團隊成員" fetchpriority="high" decoding="async"/>
+      <button class="ae-p3-open" type="button" aria-label="靠近兩位團隊成員"></button>
     </section>
-    <section class="ae-floor ae-floor-p2" data-floor="P2"><div class="ae-p2-wall"><button class="ae-p2-board ae-p2-person" data-person="0" type="button" aria-label="查看資深執業律師經歷"><span class="ae-p2-board-content"></span></button><button class="ae-p2-board ae-p2-person" data-person="1" type="button" aria-label="查看法律實務顧問經歷"><span class="ae-p2-board-content"></span></button></div>
-      
+    <section class="ae-floor ae-floor-p2" data-floor="P2">
+      <img class="ae-scene" data-scene-src="/assets/about-elevator/p2-scene.webp" alt="從電梯看向簡潔的灰色 concrete corridor" loading="lazy" decoding="async"/>
+      <div class="ae-p2-lightbox" aria-hidden="true">ABOUT US</div>
+      <div class="ae-p2-wall"><button class="ae-p2-board ae-p2-person" data-person="0" type="button" aria-label="查看資深執業律師經歷"><span class="ae-p2-board-content"></span></button><button class="ae-p2-board ae-p2-person" data-person="1" type="button" aria-label="查看法律實務顧問經歷"><span class="ae-p2-board-content"></span></button></div>
     </section>
     <section class="ae-floor ae-floor-rf" data-floor="RF">
-      <div class="ae-rf-room"><div class="ae-rf-window" aria-hidden="true"></div><div class="ae-rf-sofa" aria-hidden="true"></div>
-        <div class="ae-rf-brand"><strong>LEGAL KIM</strong><span>Our little tribute to two unforgettable legal-and-crime dramas.<br>Inspired by the shows we love.<br>Built for contracts we actually use.</span></div>
+      <img class="ae-scene" data-scene-src="/assets/about-elevator/rf-scene.webp" alt="金色時光中的 Legal Kim 辦公室，窗外有台北 101" loading="lazy" decoding="async"/>
+      <div class="ae-rf-room">
         <button class="ae-object ae-lamp" type="button" aria-label="桌燈"></button>
         <button class="ae-object ae-dossier" type="button" aria-label="打開 About Us 文件"></button>
-        <button class="ae-object ae-talk" type="button">TALK TO KIM →</button>
+        <button class="ae-object ae-talk" type="button" aria-label="聯絡 Kim"></button>
         <button class="ae-object ae-typewriter" type="button" aria-label="打字機"></button><div class="ae-type-paper" aria-live="polite"></div>
         <button class="ae-object ae-tribute" type="button" aria-label="查看致敬內容"></button>
         <button class="ae-object ae-cat" type="button" aria-label="摸摸地瓜"></button>
-        <div class="ae-desk" aria-hidden="true"></div>
       </div>
       <button class="ae-enter" type="button" aria-label="走進 Legal Kim 空間">走出電梯</button>
     </section>
@@ -2786,7 +2788,7 @@ body.review-page-active header.hero{
       <button class="ae-button" data-floor="P2" type="button" aria-label="前往 P2">P2</button>
       <button class="ae-button is-active" data-floor="P3" type="button" aria-label="前往 P3">P3</button>
     </aside>
-    <button class="ae-p3-closeup" type="button" aria-label="返回 P3 停車場"><img src="/assets/extracted/img-eab760bff52607c6.webp" alt="團隊主視覺"></button><div class="ae-doors" aria-hidden="true"><div class="ae-door left"></div><div class="ae-door right"></div></div>
+    <button class="ae-p3-closeup" type="button" aria-label="返回 P3 停車場"><img src="/assets/extracted/img-eab760bff52607c6.webp" alt="團隊主視覺" decoding="async"></button><div class="ae-portal" aria-hidden="true"></div><div class="ae-doors" aria-hidden="true"><div class="ae-door left"></div><div class="ae-door right"></div></div>
     <div class="ae-modal" aria-hidden="true"><div class="ae-modal-card"><button class="ae-modal-close" type="button" aria-label="關閉">×</button><div class="ae-modal-body"></div></div></div>
   </div>
 </div>
@@ -2955,5 +2957,5 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 </script>
 
-<script src="/assets/about-elevator.js?v=prototype1"></script>\n</body>
+<script src="/assets/about-elevator.js?v=about-elevator-v2"></script>\n</body>
 </html>
