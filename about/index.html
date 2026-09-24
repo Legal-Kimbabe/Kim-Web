@@ -2762,13 +2762,17 @@ body.review-page-active header.hero{
 <section class="page" id="about">\n<div id="about-elevator-prototype" aria-label="About Us interactive elevator">
   <div class="ae-stage" tabindex="-1">
     <div class="ae-cabin" aria-label="閉門電梯測試場景">
+      <div class="ae-back-wall" aria-hidden="true"></div>
       <div class="ae-ceiling" aria-hidden="true"></div>
+      <div class="ae-floor" aria-hidden="true"></div>
       <div class="ae-doorway" aria-hidden="true"><div class="ae-door ae-door-left"></div><div class="ae-door ae-door-right"></div></div>
-      <aside class="ae-panel" aria-label="電梯樓層">
-      <button class="ae-button" data-floor="RF" type="button" aria-label="前往 RF">RF</button>
-      <button class="ae-button" data-floor="P2" type="button" aria-label="前往 P2">P2</button>
-      <button class="ae-button" data-floor="P3" type="button" aria-label="前往 P3">P3</button>
-      </aside>
+      <div class="ae-right-wall">
+        <aside class="ae-panel" aria-label="電梯樓層">
+          <button class="ae-button" data-floor="RF" type="button" aria-label="前往 RF">RF</button>
+          <button class="ae-button" data-floor="P2" type="button" aria-label="前往 P2">P2</button>
+          <button class="ae-button" data-floor="P3" type="button" aria-label="前往 P3">P3</button>
+        </aside>
+      </div>
     </div>
   </div>
 </div>
