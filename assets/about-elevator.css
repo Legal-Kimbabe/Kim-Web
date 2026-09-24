@@ -1,90 +1,20 @@
-/* About elevator prototype — handoff baseline.
-   RF, P2 and P3 scene plates remain in /assets/about-elevator/ but are
-   intentionally disconnected until the elevator shell/camera is approved. */
-
-#about.about-elevator-on > .about-page { display:none !important; }
-
-/* ── Elevator shell / camera ─────────────────────────────────────────── */
-#about-elevator-prototype {
-  min-height:calc(100svh - 44px);
-  overflow:hidden;
-  background:#090807;
-  color:#ead8bd;
-}
-.ae-stage {
-  position:relative;
-  min-height:clamp(620px,calc(100svh - 44px),940px);
-  overflow:hidden;
-  perspective:1200px;
-  background:radial-gradient(ellipse at 68% 32%,#3c2b1b 0,transparent 34%),#090807;
-}
-.ae-cabin {
-  position:absolute;
-  inset:-3% -8%;
-  transform:translateX(-5.5%) rotateY(-7deg);
-  transform-origin:50% 50%;
-  transform-style:preserve-3d;
-  transition:transform .62s cubic-bezier(.2,.72,.22,1);
-}
-.ae-stage.is-centering .ae-cabin { transform:translateX(0) rotateY(0deg); }
-.ae-ceiling {
-  position:absolute;
-  left:8%; right:8%; top:0; height:12%;
-  background:repeating-linear-gradient(90deg,#7b5530 0 2px,#21170f 2px 19px),linear-gradient(#ab7540,#1b130d);
-  box-shadow:0 8px 34px #000b;
-}
-
-/* ── Doors ───────────────────────────────────────────────────────────── */
-.ae-doorway { position:absolute; inset:8% 18% 0 7%; transform:translateZ(1px); overflow:hidden; border:clamp(8px,1.2vw,18px) solid #20150d; box-shadow:inset 0 0 0 2px #a16b37,inset 0 0 50px #000,0 0 70px #000; }
-.ae-door { position:absolute; top:0; bottom:0; width:50.2%; background:linear-gradient(90deg,#100e0c 0,#5c4127 10%,#201812 28%,#8f6035 50%,#201812 74%,#100e0c 100%); box-shadow:inset 0 0 42px #000; }
-.ae-door::after { content:""; position:absolute; inset:0; opacity:.43; background:repeating-linear-gradient(92deg,transparent 0 20px,rgba(255,215,157,.1) 21px 22px),linear-gradient(180deg,rgba(255,209,141,.15),transparent 35%,rgba(0,0,0,.45)); }
-.ae-door-left { left:0; border-right:2px solid #0b0907; }.ae-door-right { right:0; border-left:2px solid #0b0907; }
-
-/* ── Physical floor controls ─────────────────────────────────────────── */
-.ae-panel {
-  position:absolute;
-  z-index:2;
-  top:16%; right:2.3%; width:clamp(76px,7vw,112px);
-  padding:clamp(15px,1.5vw,23px) clamp(9px,1vw,15px);
-  transform:translateZ(42px) rotateY(-13deg);
-  transform-origin:right center;
-  border:1px solid #7b5531;
-  background:linear-gradient(105deg,#0b0907,#4b321c 45%,#120d09 100%);
-  box-shadow:inset 0 0 0 2px #0a0806,inset 0 0 22px #000,0 22px 48px #000b;
-}
-.ae-button {
-  display:grid; place-items:center;
-  width:clamp(48px,4.5vw,62px); aspect-ratio:1;
-  margin:0 auto clamp(12px,1.5vw,19px); padding:0;
-  border:2px solid #594631; border-radius:50%;
-  background:radial-gradient(circle at 39% 31%,#4a4034 0,#17130f 45%,#050505 76%);
-  color:#e4d0b5;
-  font:700 clamp(14px,1.3vw,19px)/1 "Arial Narrow",Arial,sans-serif;
-  letter-spacing:.04em;
-  box-shadow:inset 0 3px 7px #000,inset 0 0 0 1px #93785966,0 2px 5px #000;
-  cursor:pointer;
-  transition:transform .14s ease,box-shadow .2s ease,border-color .2s ease,color .2s ease;
-}
-.ae-button:last-child { margin-bottom:0; }
-.ae-button:active,.ae-button.is-pressed { transform:translateY(3px); }
-.ae-button.is-selected { color:#ffe2ad; border-color:#df9532; box-shadow:inset 0 5px 9px #000,0 0 12px rgba(234,161,61,.38),0 0 2px #ffd28a; }
-.ae-button:focus-visible { outline:2px solid #ffe0a7; outline-offset:3px; }
-
-/* ── RF / P2 / P3 scenes ───────────────────────────────────────────────
-   Locked scene assets are retained, but no destination scene is mounted in
-   this approval-only elevator shell. */
-
-/* ── Hotspots / interaction markers ────────────────────────────────────
-   Temporarily disconnected with the destination scenes. */
-
-/* ── Responsive shell ────────────────────────────────────────────────── */
-@media (max-width:700px) {
-  #about-elevator-prototype { min-height:calc(100svh - 40px); }
-  .ae-stage { min-height:calc(100svh - 40px); perspective:900px; }
-  .ae-cabin { inset:-2% -14%; transform:translateX(-8%) rotateY(-7deg); }
-  .ae-stage.is-centering .ae-cabin { transform:translateX(0) rotateY(0); }
-  .ae-doorway { inset:7% 16% 0 4%; }
-  .ae-panel { right:1%; top:18%; width:66px; padding:13px 7px; }
-  .ae-button { width:45px; margin-bottom:12px; font-size:14px; }
-}
-@media (prefers-reduced-motion:reduce) { .ae-cabin,.ae-button { transition-duration:.01ms !important; } }
+/* About elevator — static interior approval pass.
+   No camera animation, doors or destination scenes in this pass. */
+#about.about-elevator-on>.about-page{display:none!important}
+#about-elevator-prototype{min-height:calc(100svh - 44px);overflow:hidden;background:#080706;color:#e8d7be}
+.ae-stage{position:relative;height:calc(100svh - 44px);min-height:620px;max-height:940px;overflow:hidden;background:#080706;perspective:1200px;perspective-origin:52% 47%}
+.ae-cabin{position:absolute;inset:0;overflow:hidden;background:#0a0807;transform-style:preserve-3d}
+.ae-back-wall{position:absolute;inset:7% 19% 8% 7%;background:linear-gradient(90deg,#17110d 0 4%,#2d2017 4% 7%,#100d0b 7% 93%,#332318 93% 97%,#120e0b 97%);box-shadow:inset 0 0 90px #000}
+.ae-ceiling{position:absolute;z-index:5;left:2%;right:2%;top:-1%;height:13%;clip-path:polygon(0 0,100% 0,91% 100%,7% 100%);background:repeating-linear-gradient(90deg,#17100c 0 4.2%,#6b4528 4.3% 4.55%,#20150e 4.7% 8.5%);box-shadow:inset 0 -3px #815632,0 12px 35px #000b}
+.ae-ceiling:after{content:"";position:absolute;left:22%;right:24%;top:24%;height:34%;background:radial-gradient(ellipse,rgba(255,211,151,.32),rgba(190,116,55,.08) 42%,transparent 72%);filter:blur(8px)}
+.ae-floor{position:absolute;z-index:5;left:1%;right:1%;bottom:-1%;height:17%;clip-path:polygon(7% 0,91% 0,100% 100%,0 100%);background:linear-gradient(180deg,#221912,#0b0908 76%),repeating-linear-gradient(90deg,transparent 0 6%,#6d4b2e33 6.1% 6.3%);border-top:1px solid #725034;box-shadow:inset 0 20px 45px #000}
+.ae-doorway{position:absolute;z-index:3;left:10%;right:25%;top:11%;bottom:10%;overflow:hidden;border:clamp(10px,1.1vw,17px) solid #2b1d13;border-top-width:clamp(14px,1.45vw,22px);background:#070605;box-shadow:inset 0 0 0 2px #8a5d38,inset 0 0 50px #000,0 0 55px #000c}
+.ae-door{position:absolute;top:0;bottom:0;width:50.2%;background:linear-gradient(180deg,rgba(236,185,128,.09),transparent 22%,rgba(0,0,0,.22)),repeating-linear-gradient(90deg,transparent 0 12%,rgba(245,203,153,.045) 12.2% 12.6%),linear-gradient(90deg,#18120e,#65452f 22%,#2c2119 48%,#745039 73%,#18130f);box-shadow:inset 0 0 36px #0009}
+.ae-door-left{left:0;border-right:1px solid #050403}.ae-door-right{right:0;border-left:1px solid #050403}
+.ae-door-left:after,.ae-door-right:after{content:"";position:absolute;top:0;bottom:0;width:3px;background:#030302}.ae-door-left:after{right:0}.ae-door-right:after{left:0}
+.ae-right-wall{position:absolute;z-index:6;right:-1%;top:8%;bottom:7%;width:25%;clip-path:polygon(24% 4%,100% 0,100% 100%,0 96%);background:linear-gradient(105deg,#17100b 0,#3d291b 37%,#70492c 64%,#17100b 100%);border-left:2px solid #805535;box-shadow:inset 20px 0 42px #0008,inset -12px 0 35px #0008,-18px 0 40px #0008}
+.ae-right-wall:before{content:"";position:absolute;left:11%;top:3%;bottom:3%;width:1px;background:#a06b3d66;box-shadow:20px 0 #24170f,42px 0 #80533144}
+.ae-panel{position:absolute;top:20%;left:29%;width:clamp(84px,7vw,112px);padding:clamp(15px,1.5vw,23px) 8px;border:1px solid #725033;background:linear-gradient(120deg,#0a0807,#352419 58%,#0b0806);box-shadow:inset 0 0 0 2px #080605,inset 0 0 25px #000,0 15px 30px #0009;transform:perspective(600px) rotateY(-7deg)}
+.ae-button{display:grid;place-items:center;width:clamp(50px,4.5vw,64px);aspect-ratio:1;margin:0 auto clamp(15px,1.5vw,20px);padding:0;border:2px solid #66513a;border-radius:50%;background:radial-gradient(circle at 38% 28%,#625547 0,#211b15 39%,#050505 76%);color:#e7d4ba;font:700 clamp(14px,1.2vw,18px)/1 "Arial Narrow",Arial,sans-serif;letter-spacing:.04em;box-shadow:inset 0 4px 8px #000,inset 0 0 0 1px #a2845e66,0 4px 7px #000;cursor:pointer}
+.ae-button:last-child{margin-bottom:0}.ae-button:active,.ae-button.is-pressed{transform:translateY(3px)}.ae-button.is-selected{color:#ffe0a3;border-color:#c98c3e;box-shadow:inset 0 5px 9px #000,0 0 11px #d48b3266}.ae-button:focus-visible{outline:2px solid #ffe0a7;outline-offset:3px}
+@media(max-width:700px){#about-elevator-prototype{min-height:calc(100svh - 40px)}.ae-stage{height:calc(100svh - 40px);min-height:560px;perspective:900px}.ae-doorway{left:4%;right:28%;top:10%;bottom:9%}.ae-right-wall{width:30%;right:-2%}.ae-panel{left:25%;width:74px;padding:13px 6px}.ae-button{width:44px;margin-bottom:13px;font-size:13px}.ae-ceiling{height:12%}.ae-floor{height:15%}}
