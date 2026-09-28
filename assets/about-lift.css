@@ -1,0 +1,461 @@
+/* 金法務在線｜關於我們・電梯（RF 頂樓、G 免費下載、P2 團隊經歷、P3 致敬）
+   所有樣式都以 .lkl 開頭，不影響其他頁面。 */
+#about.lkl-on > .about-page { display: none !important; }
+/* =========================================================
+   金法務在線｜關於我們・電梯
+   所有樣式都以 .lkl 開頭，不會影響網站其他區塊
+   ========================================================= */
+.lkl {
+  /* 網站導覽列的高度：電梯會剛好塞滿「螢幕高度扣掉導覽列」 */
+  --lkl-header: 94px; /* 由 about-lift.js 依實際導覽列位置自動更新 */
+
+  /* 圖片 */
+  --lkl-img-car: url(/assets/about-lift/lk-elevator-d2.webp?v=d2);
+  --lkl-img-rf: url(/assets/about-lift/lk-rf-cat-normal.webp?v=m1);
+  --lkl-img-p2: url(/assets/about-lift/lk-p2.webp);
+  --lkl-img-p3: url(/assets/about-lift/lk-p3-far.webp);
+  --lkl-img-rf-belly: url(/assets/about-lift/lk-rf-cat-belly.webp?v=m1);
+  --lkl-img-rf-yawn: url(/assets/about-lift/lk-rf-cat-yawn.webp?v=m1);
+
+  --lkl-ink: #0b0a09;
+  --lkl-paper: #ece4d6;
+  --lkl-amber: #f4aa52;
+  --lkl-amber-hi: #ffd79c;
+
+  --lkl-sans: "Noto Sans TC", "Noto Sans CJK TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --lkl-sign: "League Gothic", "Arial Narrow", sans-serif;
+
+  --lkl-dx: 25.419%; --lkl-dy: 17.216%; --lkl-dw: 48.624%; --lkl-dh: 71.307%;   /* 桌機門洞（依 1672×941 桌機 master 量測） */
+
+  position: relative;
+  font-family: var(--lkl-sans);
+  color: var(--lkl-paper);
+  background: var(--lkl-ink);
+  overflow: hidden;
+}
+.lkl *, .lkl *::before, .lkl *::after { box-sizing: border-box; }
+.lkl :focus-visible { outline: 2px solid var(--lkl-amber); outline-offset: 3px; }
+.lkl :where(button) { font: inherit; color: inherit; }
+
+.lkl-frame {
+  position: relative;
+  min-height: max(380px, calc(100svh - var(--lkl-header)));   /* 電梯內填滿一屏；走出後可隨內容往下捲 */
+  display: flex; align-items: center; justify-content: center;
+}
+.lkl-frame::before {
+  content: ""; position: absolute; inset: -40px;
+  background: var(--lkl-img-car) center / cover no-repeat;
+  filter: blur(34px) brightness(.35) saturate(.8);
+}
+
+.lkl-stage {
+  position: relative;
+  width: min(100%, calc((100svh - var(--lkl-header)) * 1672 / 941));   /* 電梯內：依視窗高度，完整顯示 16:9 桌機 master */
+  aspect-ratio: 1672 / 941;
+  transition: width 1.15s cubic-bezier(.6,0,.3,1);
+  overflow: hidden;
+  container-type: inline-size;
+  background: #000;
+}
+
+/* ---------- 電梯 ---------- */
+.lkl-car {
+  position: absolute; inset: 0; z-index: 1;
+  transform-origin: 49.73% 52.87%;
+  transition: transform 1.15s cubic-bezier(.6,0,.3,1), filter 1.15s;
+}
+.lkl.is-out .lkl-car { transform: scale(1.45); filter: brightness(.6); }
+/* 門片與電梯是同一組幾何：門組跟電梯套用完全相同的縮放，不論開門、走出、走回、關門都不會錯位 */
+.lkl-doorset {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  transform-origin: 49.73% 52.87%;
+  transition: transform 1.15s cubic-bezier(.6,0,.3,1);
+}
+.lkl.is-out .lkl-doorset { transform: scale(1.45); }
+/* 走出電梯後：舞台接管整個內容寬度，不再受電梯視窗限制 */
+.lkl.is-out .lkl-stage { width: 100%; }
+
+/* 電梯照片與按鍵的座標容器：桌機＝整個舞台；直式手機由 JS 依直式電梯圖計算 */
+/* 桌機：舞台與 1672×941 master 同比例，完整顯示不裁切 */
+.lkl-carcam { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: var(--lkl-img-car) center / 100% 100% no-repeat; }
+
+/* The photographic cabin already includes the approved ABOUT US metal plaque. */
+.lkl-sign { display: none; }
+
+/* 樓層按鍵：直接使用參考照片裡的黑色實體圓鍵（含厚度與光澤），只把字換成 RF／P2／P3 */
+.lkl-call {
+  position: absolute; left: 81.758%; width: 3.828%; height: 6.801%;   /* 座標為桌機 master 內的比例 */
+  border: 0; padding: 0; cursor: pointer; border-radius: 50%;
+  background: none;
+  z-index: 2;
+}
+.lkl-call[data-floor="RF"] { top: 28.162%; }
+.lkl-call[data-floor="G"]  { top: 36.132%; }
+.lkl-call[data-floor="P2"] { top: 44.315%; }
+.lkl-call[data-floor="P3"] { top: 52.285%; }
+/* 樓層鍵：外觀不變，把看不見的點擊範圍往左右擴大（上下已與相鄰按鍵相接） */
+.lkl-call::before { content: ""; position: absolute; left: 50%; top: 0; width: max(160%, 52px); height: 100%; transform: translateX(-50%); }
+.lkl-call-lit {
+  position: absolute; left: -20.31%; top: -20.31%; width: 140.63%; height: 140.63%;
+  background: none center / 100% 100% no-repeat;
+  opacity: 0; transition: opacity .3s; pointer-events: none;
+}
+/* 桌機亮燈：依新 master 的按鍵製作的光環＋暖光字，疊在未亮的按鍵上 */
+.lkl-call[data-floor="RF"] .lkl-call-lit { background-image: url(/assets/about-lift/lk-d-lit-RF.webp?v=d2); }
+.lkl-call[data-floor="G"]  .lkl-call-lit { background-image: url(/assets/about-lift/lk-d-lit-G.webp?v=d2); }
+.lkl-call[data-floor="P2"] .lkl-call-lit { background-image: url(/assets/about-lift/lk-d-lit-P2.webp?v=d2); }
+.lkl-call[data-floor="P3"] .lkl-call-lit { background-image: url(/assets/about-lift/lk-d-lit-P3.webp?v=d2); }
+.lkl-call.is-lit .lkl-call-lit { opacity: 1; }
+.lkl-call-label { display: none; }   /* 按鍵字已在 master 內 */
+.lkl-call-label-unused {
+  position: absolute; left: 43.5%; top: 48.4%;
+  transform: translate(-50%, -50%) scaleX(.62);
+  font-family: var(--lkl-sans); font-weight: 500; font-size: 3.2cqw; line-height: 1; letter-spacing: .01em;
+  color: rgb(198,163,137); text-shadow: 0 0 .06em rgba(0,0,0,.6);
+  transition: color .3s, text-shadow .3s; pointer-events: none;
+}
+.lkl-call.is-lit .lkl-call-label-unused {
+  color: rgb(245,220,169);
+  text-shadow: 0 0 .12em rgba(255,176,90,.95), 0 0 .35em rgba(255,140,40,.75);
+}
+
+/* ---------- 門 ---------- */
+.lkl-doors {
+  position: absolute; left: var(--lkl-dx); top: var(--lkl-dy); width: var(--lkl-dw); height: var(--lkl-dh);
+  overflow: hidden; z-index: 3; pointer-events: none;
+}
+.lkl-leaf { position: absolute; top: 0; height: 100%; overflow: hidden; transition: transform 1s cubic-bezier(.65,0,.25,1), visibility 0s linear 0s; }
+/* 門完全打開後，門片已在門框外：不再繪製，避免門縫邊緣在縮放時留下一條黑線 */
+.lkl.is-open .lkl-leaf { visibility: hidden; transition: transform 1s cubic-bezier(.65,0,.25,1), visibility 0s linear 1s; }
+.lkl-leaf.is-l { left: 0; width: 49.57%; }
+.lkl-leaf.is-r { left: 49.57%; width: 50.43%; }
+.lkl-leaf i { position: absolute; top: -24.143%; height: 140.24%; background: var(--lkl-img-car) center / 100% 100% no-repeat; }
+.lkl-leaf.is-l i { left: -105.47%; width: 414.87%; }
+.lkl-leaf.is-r i { left: -201.97%; width: 407.80%; }
+.lkl.is-open .lkl-leaf.is-l { transform: translateX(-100%); }
+.lkl.is-open .lkl-leaf.is-r { transform: translateX(100%); }
+
+/* ---------- 樓層場景 ---------- */
+.lkl-scene {
+  position: absolute; z-index: 2; overflow: hidden;
+  left: var(--lkl-dx); top: var(--lkl-dy); width: var(--lkl-dw); height: var(--lkl-dh);
+  transition: left 1.15s cubic-bezier(.6,0,.3,1), top 1.15s cubic-bezier(.6,0,.3,1), width 1.15s cubic-bezier(.6,0,.3,1), height 1.15s cubic-bezier(.6,0,.3,1);
+  visibility: hidden;
+  container-type: size;
+}
+.lkl-scene.is-current { visibility: visible; }
+.lkl.is-out .lkl-scene.is-current { left: 0; top: 0; width: 100%; height: 100%; }
+
+.lkl-cam {
+  position: absolute; left: 50%; top: 50%;
+  width: max(100%, calc(100cqh * 1.5)); aspect-ratio: 3 / 2;
+  transform: translate(-50%, -50%);
+  container-type: inline-size;
+}
+.lkl-cam-inner { position: absolute; inset: 0; transform-origin: 0 0; transition: transform 1.3s cubic-bezier(.55,0,.25,1); }
+.lkl-bg { position: absolute; inset: 0; background-position: center; background-size: 100% 100%; background-repeat: no-repeat; }
+.lkl-scene[data-floor="RF"] .lkl-bg { background-image: var(--lkl-img-rf); background-size: cover; }
+.lkl-scene[data-floor="P2"] .lkl-bg { background-image: var(--lkl-img-p2); }
+.lkl-scene[data-floor="P3"] .lkl-bg { background-image: var(--lkl-img-p3); }
+/* G：P1－P4 定稿 reference 完整顯示（1366×768，不裁切）；同一樓層內淡入切換 */
+.lkl-scene[data-floor="G"] .lkl-cam { width: max(100%, calc(100cqh * 1366 / 768)); aspect-ratio: 1366 / 768; }
+.lkl-gpages { position: absolute; inset: 0; }
+.lkl-gpage { position: absolute; inset: 0; background: center / 100% 100% no-repeat; transition: opacity .35s ease, visibility .35s; }
+.lkl-gpage.is-p1 { background-image: url(/assets/about-lift/lk-g-p1.webp?v=g6); }
+.lkl-gpage.is-p2 { background-image: url(/assets/about-lift/lk-g-p2.png?v=g8); opacity: 0; visibility: hidden; }
+.lkl-gpage.is-p3 { background-image: url(/assets/about-lift/lk-g-p3.png?v=g7); opacity: 0; visibility: hidden; }
+.lkl-gpage.is-p4 { background-image: url(/assets/about-lift/lk-g-p4.png?v=g7); opacity: 0; visibility: hidden; }
+.lkl-gpage.is-p5 { background-image: url(/assets/about-lift/lk-g-p5.png?v=g8); opacity: 0; visibility: hidden; }
+.lkl-gpages[data-page="2"] .is-p1 { opacity: 0; visibility: hidden; }
+.lkl-gpages[data-page="2"] .is-p2 { opacity: 1; visibility: visible; }
+.lkl-gpages[data-page="3"] .is-p1,
+.lkl-gpages[data-page="4"] .is-p1,
+.lkl-gpages[data-page="5"] .is-p1 { opacity: 0; visibility: hidden; }
+.lkl-gpages[data-page="3"] .is-p3 { opacity: 1; visibility: visible; }
+.lkl-gpages[data-page="4"] .is-p4 { opacity: 1; visibility: visible; }
+.lkl-gpages[data-page="5"] .is-p5 { opacity: 1; visibility: visible; }
+/* 透明熱區：不改變 reference 的任何視覺 */
+.lkl-dl, .lkl-gnav { position: absolute; display: block; padding: 0; border: 0; background: none; border-radius: 99px; pointer-events: none; -webkit-tap-highlight-color: transparent; }
+.lkl.is-out .lkl-scene[data-floor="G"].is-current .lkl-dl[href],
+.lkl.is-out .lkl-scene[data-floor="G"].is-current .lkl-gnav:not(:disabled) { pointer-events: auto; cursor: pointer; }
+.lkl-gnav { border-radius: 8px; }
+.lkl-scene[data-floor="P3"] .lkl-cam-inner { transition-timing-function: cubic-bezier(.45,.05,.25,1); }
+.lkl-belly, .lkl-yawn {
+  position: absolute; inset: 0; background-position: center; background-size: cover; background-repeat: no-repeat;
+  opacity: 0; transition: opacity .28s ease-in-out;
+  /* 只在貓咪附近淡入淡出，畫面其他地方維持不動 */
+  -webkit-mask-image: radial-gradient(ellipse 20% 14% at 20% 81.3%, #000 68%, transparent 100%);
+          mask-image: radial-gradient(ellipse 20% 14% at 20% 81.3%, #000 68%, transparent 100%);
+}
+.lkl-belly { background-image: var(--lkl-img-rf-belly); }
+.lkl-yawn { background-image: var(--lkl-img-rf-yawn); }
+.lkl-belly.is-on { opacity: 1; }
+.lkl-yawn.is-on { opacity: 1; }
+
+/* 以原圖像素為單位的文字層，會跟著畫面縮放 */
+.lkl-layer { position: absolute; left: 0; top: 0; transform-origin: 0 0; transform: scale(var(--k, 1)); pointer-events: none; }
+.lkl-scene[data-floor="RF"] .lkl-layer { width: 1135px; height: 757px; }
+.lkl-scene[data-floor="P2"] .lkl-layer { width: 1380px; height: 920px; }
+.lkl-scene[data-floor="RF"] .lkl-layer { display: none; }
+.lkl-layer.is-m { display: none; }
+
+/* RF 牆上的字（原圖的字已清掉，改用網頁文字，走近時一樣清楚） */
+.lkl-wall-line {
+  position: absolute; left: 771px; margin: 0;
+  transform: translateX(-50%) scaleX(var(--sx, .8)); transform-origin: 50% 50%;
+  font-family: var(--lkl-sans); font-weight: 500; font-size: 15px; line-height: 15px;
+  color: #1a1512; opacity: .9; mix-blend-mode: multiply; white-space: nowrap;
+}
+
+/* P2 壓克力牌（依牌子的透視角度貼上去） */
+.lkl-plq { position: absolute; left: 0; top: 0; transform-origin: 0 0; color: #1b1815; mix-blend-mode: multiply; opacity: .92; }
+.lkl-plq.is-l { width: 620px; height: 1015px; transform: matrix3d(0.343715,-0.0566266,0,-0.00011421,-0.00113417,0.426441,0,-2.54611e-07,0,0,1,0,586,194,0,1); }
+.lkl-plq.is-r { width: 620px; height: 1114px; transform: matrix3d(0.327697,-0.045495,0,-9.00473e-05,-0.00396497,0.422476,0,-3.31242e-06,0,0,1,0,927,167,0,1); }
+.lkl-plq > * { position: absolute; margin: 0; white-space: nowrap; }
+.lkl-plq-en { font-weight: 500; letter-spacing: .02em; }
+.lkl-plq-zh { font-weight: 500; letter-spacing: .04em; }
+.lkl-plq-rule { height: 3px; background: currentColor; opacity: .75; }
+.lkl-plq-rule.is-short { height: 5px; opacity: .9; }
+.lkl-plq-list { list-style: none; padding: 0; font-weight: 400; letter-spacing: .06em; }
+.lkl-plq-cred { font-weight: 400; letter-spacing: .03em; }
+.lkl-plq-cred.is-bold { font-weight: 700; }
+
+.lkl-plq.is-l .lkl-plq-en { left: 67px; top: 25.6px; font-size: 50.6px; line-height: 65.2px; }
+.lkl-plq.is-l .lkl-plq-zh { left: 67px; top: 177.3px; font-size: 46.5px; line-height: 46.5px; }
+.lkl-plq.is-l .lkl-plq-rule { left: 67px; width: 516px; top: 262px; }
+.lkl-plq.is-l .lkl-plq-list { left: 67px; top: 296.4px; font-size: 38.7px; line-height: 55.5px; }
+.lkl-plq.is-l .lkl-plq-rule.is-2 { top: 784px; }
+.lkl-plq.is-l .lkl-plq-rule.is-short { top: 783px; width: 190px; }
+.lkl-plq.is-l .lkl-plq-cred.is-1 { left: 67px; top: 827.3px; font-size: 29.4px; line-height: 45px; }
+.lkl-plq.is-l .lkl-plq-cred.is-2 { left: 67px; top: 896.3px; font-size: 27.8px; line-height: 48.8px; }
+
+.lkl-plq.is-r .lkl-plq-en { left: 75px; top: 31.8px; font-size: 58.4px; line-height: 70.2px; }
+.lkl-plq.is-r .lkl-plq-zh { left: 75px; top: 195.8px; font-size: 52.6px; line-height: 52.6px; }
+.lkl-plq.is-r .lkl-plq-rule { left: 75px; width: 514px; top: 288px; }
+.lkl-plq.is-r .lkl-plq-list { left: 75px; top: 323.5px; font-size: 42.2px; line-height: 67.8px; }
+.lkl-plq.is-r .lkl-plq-rule.is-2 { top: 906px; }
+.lkl-plq.is-r .lkl-plq-rule.is-short { top: 905px; width: 190px; }
+.lkl-plq.is-r .lkl-plq-cred.is-1 { left: 75px; top: 950.7px; font-size: 29.8px; line-height: 45px; }
+.lkl-plq.is-r .lkl-plq-cred.is-2 { left: 75px; top: 1022.9px; font-size: 29.8px; line-height: 45px; }
+
+/* 可以點的地方：只用光暈提示 */
+.lkl-spot {
+  position: absolute; border: 0; padding: 0; margin: 0; background: none; cursor: pointer;
+  display: block; opacity: 0; pointer-events: none; transition: opacity .5s;
+}
+.lkl.is-out .lkl-scene.is-current:not(.is-zoomed) .lkl-spot { opacity: 1; pointer-events: auto; }
+.lkl-spot::after {
+  content: ""; position: absolute; left: var(--mx, 50%); top: var(--my, 50%);
+  width: clamp(16px, 2.4cqw, 30px); aspect-ratio: 1; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255,215,156,.9) 0 22%, rgba(244,170,82,.45) 45%, transparent 70%);
+  animation: lkl-glow 2.4s ease-in-out infinite;
+}
+.lkl-spot:hover::after, .lkl-spot:focus-visible::after { animation-duration: 1s; }
+@keyframes lkl-glow {
+  0%, 100% { transform: translate(-50%,-50%) scale(.8); opacity: .55; }
+  50% { transform: translate(-50%,-50%) scale(1.5); opacity: 1; }
+}
+.lkl-spot.is-wall { left: 50.2%; top: 14.6%; width: 19.8%; height: 24.2%; --mx: 50%; --my: 104%; }
+.lkl-spot.is-cat  { left: 5.4%; top: 72.6%; width: 25.6%; height: 17.8%; --mx: 44%; --my: 44%; }
+.lkl-spot.is-talk { left: 62.2%; top: 47.7%; width: 9.6%; height: 6.6%; --mx: 50%; --my: -40%; }
+
+.lkl-spot.is-plq { left: 42.3%; top: 15%; width: 44.4%; height: 57%; --mx: 50%; --my: 94%; }
+
+
+/* 走近後：點畫面任何地方就退回 */
+.lkl-unzoom {
+  position: absolute; inset: 0; z-index: 4; border: 0; padding: 0; background: none;
+  cursor: zoom-out; display: none;
+}
+.lkl-scene.is-zoomed .lkl-unzoom { display: block; }
+
+.lkl-purr {
+  position: absolute; left: 8%; top: 70%; z-index: 3; pointer-events: none; margin: 0;
+  font-size: clamp(12px, 1.6cqw, 18px); color: var(--lkl-paper);
+  background: rgba(10,9,8,.75); padding: .35em .8em; border-radius: 1em;
+  opacity: 0; transform: translateY(6px); transition: opacity .3s, transform .3s;
+}
+.lkl-purr.is-on { opacity: 1; transform: none; }
+.lkl-heart {
+  position: absolute; z-index: 3; pointer-events: none;
+  font-size: clamp(14px, 2cqw, 24px); color: #ff8f7a;
+  animation: lkl-float 1.6s ease-out forwards;
+}
+@keyframes lkl-float {
+  from { transform: translate(-50%, 0) scale(.6); opacity: 0; }
+  20% { opacity: 1; }
+  to { transform: translate(calc(-50% + var(--drift, 0px)), -9cqw) scale(1.1); opacity: 0; }
+}
+
+/* 返回電梯：場景正下方的雙線箭頭，平時低亮度，滑過時柔和發光 */
+/* 地上的雙線箭頭：返回電梯。加深陰影，亮黃畫面上也看得清楚 */
+.lkl-arrow {
+  position: absolute; left: 50%; z-index: 6;
+  width: clamp(44px, 5.4cqw, 84px); aspect-ratio: 48 / 46;
+  padding: 0; border: 0; background: none; cursor: pointer;
+  transform: translateX(-50%);
+  opacity: 0; pointer-events: none;
+  filter: drop-shadow(0 0 1.5px rgba(0,0,0,.85)) drop-shadow(0 1px 5px rgba(0,0,0,.6));
+  transition: opacity .35s ease, filter .35s ease;
+}
+.lkl-arrow svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.lkl-arrow path { fill: none; stroke: #ffd49a; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.lkl-arrow:hover, .lkl-arrow:focus-visible {
+  filter: drop-shadow(0 0 1.5px rgba(0,0,0,.85)) drop-shadow(0 0 6px rgba(255,178,92,.95)) drop-shadow(0 0 16px rgba(255,150,60,.6));
+}
+.lkl-arrow:focus-visible { outline: none; }
+@keyframes lkl-arrow-breathe { 0%, 100% { opacity: .62; } 50% { opacity: 1; } }
+.lkl-return { bottom: 2.4%; }
+.lkl.is-out .lkl-return { opacity: .8; pointer-events: auto; animation: lkl-arrow-breathe 2.8s ease-in-out infinite; }
+@media (max-aspect-ratio: 1/1) {
+  .lkl.is-out.is-zoomed[data-at="P2"] .lkl-return { opacity: 0; pointer-events: none; animation: none; }
+}
+.lkl-arrow:hover, .lkl-arrow:focus-visible { animation: none !important; opacity: 1 !important; }
+
+/* RF 開場旁白：左下角很薄的透明小卡 */
+.lkl-narr {
+  position: absolute; left: 3%; bottom: 29%; z-index: 7; /* 左下方、剛好在地瓜上面，不擋住牠 */
+  width: min(44%, 460px); min-width: 210px;
+  padding: 1.1cqw 1.4cqw .8cqw;
+  background: rgba(12,10,8,.46);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,238,214,.16); border-radius: 3px;
+  color: #f3e9d7;
+  opacity: 0; transform: translateY(6px); pointer-events: none;
+  transition: opacity .45s ease, transform .45s ease;
+}
+.lkl-narr.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.lkl-narr p { margin: 0; }
+.lkl-narr-time {
+  font-family: var(--lkl-sign); font-size: max(1.35cqw, 12px); letter-spacing: .12em;
+  color: #f2b872; margin-bottom: .35em !important;
+}
+.lkl-narr-text {
+  min-height: 2.9em;
+  font-family: var(--lkl-sans); font-weight: 400; font-size: max(1.3cqw, 12px); line-height: 1.6; letter-spacing: .04em;
+}
+.lkl-narr-next {
+  display: block; margin: .3em 0 0 auto; padding: .2em .1em;
+  border: 0; background: none; cursor: pointer;
+  font-family: var(--lkl-sign); font-size: max(1.25cqw, 12px); letter-spacing: .16em;
+  color: #f2b872; opacity: .8; transition: opacity .2s, text-shadow .2s;
+}
+.lkl-narr-next:hover, .lkl-narr-next:focus-visible { opacity: 1; outline: none; text-shadow: 0 0 8px rgba(255,170,80,.7); }
+.lkl-narr.is-quip .lkl-narr-next { display: none; }
+.lkl-narr.is-quip .lkl-narr-text { min-height: 0; white-space: pre-line; }
+.lkl-narr.is-quip { padding-bottom: 1.1cqw; }
+@media (max-width: 700px) { .lkl-narr { width: 70%; left: 3%; top: 3%; bottom: auto; padding: 6px 9px 4px; } .lkl-narr-text { min-height: 0; } }
+/* 直式手機：遊戲卡放在場景內、地瓜下方的地板上，位於返回箭頭之上 */
+@media (max-aspect-ratio: 1/1) {
+  .lkl-narr { min-width: 0; left: 3%; right: 3%; width: auto; top: auto; bottom: calc(2.4% + 58px); padding: 9px 12px 7px; }
+  .lkl-narr .lkl-narr-text { min-height: 0; font-size: 14px; }
+  .lkl-narr .lkl-narr-time, .lkl-narr .lkl-narr-next { font-size: 13px; }
+}
+@media (max-aspect-ratio: 1/1) and (max-height: 700px) {
+  .lkl-narr { padding: 6px 10px 4px; bottom: calc(2.4% + 52px); left: 46%; right: 3%; }   /* 矮螢幕：放在地瓜右側的地板上，不蓋住牠 */
+  .lkl-narr .lkl-narr-text { font-size: 13px; line-height: 1.45; }
+  .lkl-narr .lkl-narr-time, .lkl-narr .lkl-narr-next { font-size: 12px; }
+}
+@keyframes lkl-narr-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* =========================================================
+   直式手機：獨立的 portrait 視覺系統
+   電梯、各樓層都使用直式 master，只在這個斷點內引用，桌機不會下載這些圖；
+   位置與可點區域都依直式素材重新量測，不沿用桌機座標。
+   ========================================================= */
+@media (max-aspect-ratio: 1/1) {
+  .lkl {
+    --lkl-m-car: url(/assets/about-lift/lk-m-elevator.webp?v=g1);
+    --lkl-m-rf: url(/assets/about-lift/lk-m-rf.webp?v=g1);
+    --lkl-m-rf-belly: url(/assets/about-lift/lk-m-rf-belly.webp?v=g1);
+    --lkl-m-rf-yawn: url(/assets/about-lift/lk-m-rf-yawn.webp?v=g1);
+    --lkl-m-p2: url(/assets/about-lift/lk-m-p2.webp?v=g1);
+    --lkl-m-p3: url(/assets/about-lift/lk-m-p3.webp?v=g1);
+  }
+  .lkl-frame { height: auto; min-height: 0; }
+  .lkl-frame::before { background: none; filter: none; }
+  .lkl-stage { width: 100%; height: var(--lkl-fill, calc(100svh - var(--lkl-header) - 120px)); aspect-ratio: auto; }
+
+  /* 電梯：直式電梯圖依可用空間 cover，靠右對齊以保留樓層按鍵 */
+  .lkl-car { background: none; transform-origin: var(--lkl-co, 45% 52%); }
+  .lkl-doorset { transform-origin: var(--lkl-co, 45% 52%); }
+  .lkl-carcam {
+    inset: auto; left: var(--lkl-cx, 0px); top: var(--lkl-cy, 0px);
+    width: var(--lkl-cw, 100%); height: var(--lkl-ch, 100%);
+    background: var(--lkl-m-car) center / 100% 100% no-repeat;
+  }
+  /* 四顆按鍵：底圖已是全暗的實體按鍵，只疊點擊範圍與目前樓層的亮燈 */
+  .lkl-call { left: 89.65%; width: 9.4%; height: 7.03%; background: none; filter: none; border-radius: 40%; }
+  .lkl-call[data-floor="RF"] { top: 27.86%; }
+  .lkl-call[data-floor="G"]  { top: 34.70%; }
+  .lkl-call[data-floor="P2"] { top: 41.86%; }
+  .lkl-call[data-floor="P3"] { top: 48.89%; }
+  .lkl-call::before { left: 50%; width: 150%; height: 100%; }
+  .lkl-call-label { display: none; }
+  .lkl-call-lit { left: -13.54%; top: -11.11%; width: 123.96%; height: 122.22%; inset: auto; background: none center / 100% 100% no-repeat; }
+  .lkl-call[data-floor="RF"] .lkl-call-lit { left: -13.54%; top: -11.11%; width: 123.96%; height: 122.22%; background-image: url(/assets/about-lift/lk-m-lit-RF.webp?v=g1); }
+  .lkl-call[data-floor="G"]  .lkl-call-lit { left: -13.54%; top: -11.11%; width: 123.96%; height: 122.22%; background-image: url(/assets/about-lift/lk-m-lit-G.webp?v=g1); }
+  .lkl-call[data-floor="P2"] .lkl-call-lit { left: -13.54%; top: -11.11%; width: 123.96%; height: 122.22%; background-image: url(/assets/about-lift/lk-m-lit-P2.webp?v=g1); }
+  .lkl-call[data-floor="P3"] .lkl-call-lit { left: -13.54%; top: -11.11%; width: 123.96%; height: 122.22%; background-image: url(/assets/about-lift/lk-m-lit-P3.webp?v=g1); }
+
+  /* 門：門洞與門片由 JS 依直式電梯圖換算（--lkl-dx… 與 --lkl-il…） */
+  .lkl-leaf.is-l { width: 50.25%; }
+  .lkl-leaf.is-r { left: 50.25%; width: 49.75%; }
+  /* 門片內的電梯圖必須與底圖 1:1 對齊：選擇器權重要與桌機的 .lkl-leaf.is-l i 相同，
+     否則桌機的百分比寬度會蓋過來，把門片圖橫向拉寬、紋理錯位 */
+  .lkl-leaf.is-l i, .lkl-leaf.is-r i {
+    background-image: var(--lkl-m-car); background-size: 100% 100%;
+    top: var(--lkl-iy, 0px); width: var(--lkl-cw, 100%); height: var(--lkl-ch, 100%);
+  }
+  .lkl-leaf.is-l i { left: var(--lkl-ilx, 0px); }
+  .lkl-leaf.is-r i { left: var(--lkl-irx, 0px); }
+
+  /* 樓層場景：鏡頭框＝直式圖本身的比例，蓋滿畫面 */
+  .lkl-cam { width: max(100%, calc(100cqh * 941 / 1672)); aspect-ratio: 941 / 1672; }
+  .lkl-scene[data-floor="P2"] .lkl-cam { width: max(100%, calc(100cqh * 941 / 1670)); aspect-ratio: 941 / 1670; }
+  .lkl-bg { background-size: 100% 100%; }
+  .lkl-scene[data-floor="RF"] .lkl-bg { background-image: var(--lkl-m-rf); background-size: 100% 100%; }
+  .lkl-scene[data-floor="P2"] .lkl-bg { background-image: var(--lkl-m-p2); }
+  .lkl-scene[data-floor="P3"] .lkl-bg { background-image: var(--lkl-m-p3); }
+  .lkl-belly { background-image: var(--lkl-m-rf-belly); background-size: 100% 100%; }
+  .lkl-yawn  { background-image: var(--lkl-m-rf-yawn);  background-size: 100% 100%; }
+  .lkl-belly, .lkl-yawn {
+    -webkit-mask-image: radial-gradient(ellipse 28% 9.5% at 25% 65.3%, #000 72%, transparent 100%);
+            mask-image: radial-gradient(ellipse 28% 9.5% at 25% 65.3%, #000 72%, transparent 100%);
+  }
+  /* G：保留橫式 showroom 比例，走出電梯後可左右瀏覽；熱區在同一張圖內，跟著一起移動 */
+  .lkl-scene[data-floor="G"] .lkl-cam { width: calc(100cqh * 1366 / 768); aspect-ratio: 1366 / 768; }
+  .lkl.is-out .lkl-scene[data-floor="G"].is-current.is-roam { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .lkl-scene[data-floor="G"].is-roam::-webkit-scrollbar { display: none; }
+  .lkl-scene[data-floor="G"].is-roam .lkl-cam { left: 0; top: 0; transform: none; height: 100%; }
+
+  /* RF 可點區（依直式 RF 圖量測） */
+  .lkl-spot.is-cat  { left: 1.9%; top: 58.4%; width: 43.6%; height: 13.5%; --mx: 48%; --my: 42%; }
+  .lkl-spot.is-wall { left: 57%; top: 34%; width: 21%; height: 10.5%; --mx: 50%; --my: 104%; }
+  .lkl-spot.is-talk { left: 72%; top: 50.4%; width: 11%; height: 2.4%; --mx: 50%; --my: -90%; }
+  .lkl-purr { left: 6%; top: 55%; }
+  /* P2：文字改由 HTML 疊在無字的壓克力牌上 */
+  .lkl-layer.is-d { display: none; }
+  .lkl-layer.is-m { display: block; width: 941px; height: 1670px; }
+  .lkl-spot.is-plq { left: 47%; top: 26%; width: 49%; height: 27%; --mx: 50%; --my: 102%; }
+}
+/* 直式手機 P2 壓克力牌文字（牌面座標，依透視貼合） */
+.lkl-mplq { position: absolute; left: 0; top: 0; width: 620px; transform-origin: 0 0; color: #1b1815; mix-blend-mode: multiply; opacity: .92; }
+.lkl-mplq.is-l { height: 1317px; transform: matrix3d(0.217919,-0.0741978,0,-9.3997e-05,0,0.269932,0,0,0,0,1,0,461,498.5,0,1); }
+.lkl-mplq.is-r { height: 1231px; transform: matrix3d(0.237195,-0.07672,0,-9.62634e-05,0,0.313566,0,0,0,0,1,0,687,474,0,1); }
+.lkl-mplq > * { position: absolute; left: 50px; margin: 0; white-space: nowrap; }
+.lkl-mplq-en { top: 42px; font-size: 31px; line-height: 1.2; font-weight: 500; letter-spacing: .03em; }
+.lkl-mplq-zh { top: 98px; font-size: 60px; line-height: 1.15; font-weight: 700; letter-spacing: .04em; }
+.lkl-mplq-rule { top: 196px; width: 520px; height: 3px; background: currentColor; opacity: .75; }
+.lkl-mplq-list { top: 232px; padding: 0; list-style: none; font-size: 47px; line-height: 77px; font-weight: 400; letter-spacing: .04em; }
+.lkl-mplq-rule.is-2 { top: 876px; }
+.lkl-mplq-cred { top: 906px; font-size: 38px; line-height: 60px; font-weight: 400; letter-spacing: .02em; }
+.lkl-mplq.is-r .lkl-mplq-list { font-size: 49px; line-height: 76px; }
+.lkl-mplq.is-r .lkl-mplq-rule.is-2 { top: 866px; }
+.lkl-mplq.is-r .lkl-mplq-cred { top: 896px; font-size: 42px; line-height: 64px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lkl-car, .lkl-leaf, .lkl-scene, .lkl-cam-inner, .lkl-arrow, .lkl-belly, .lkl-yawn, .lkl-narr, .lkl-stage { transition: none !important; }
+  .lkl-spot::after, .lkl-heart, .lkl-sign.is-ding, .lkl-call-lit, .lkl-arrow { animation: none !important; }
+}
