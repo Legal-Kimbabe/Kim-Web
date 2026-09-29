@@ -73,6 +73,91 @@
   function scene(f) { return $('.lkl-scene[data-floor="' + f + '"]'); }
   function inner(f) { return $('.lkl-cam-inner', scene(f)); }
 
+  /* G 圖片準備：P1 與目前裝置的電梯先 decode；P2－P5 進 G 後才依序 idle 準備。 */
+  var G_IMAGES = {
+    1: '/assets/about-lift/lk-g-p1.webp?v=g6',
+    2: '/assets/about-lift/lk-g-p2.png?v=g8',
+    3: '/assets/about-lift/lk-g-p3.png?v=g7',
+    4: '/assets/about-lift/lk-g-p4.png?v=g7',
+    5: '/assets/about-lift/lk-g-p5.png?v=g8'
+  };
+  var imageJobs = Object.create(null);
+  var heldImages = Object.create(null);
+  var gReady = Object.create(null);
+  var gPageIntent = 0;
+  var gIdleStarted = false;
+
+  function loadAndDecode(url) {
+    if (imageJobs[url]) return imageJobs[url];
+    imageJobs[url] = new Promise(function (resolve, reject) {
+      var img = new Image();
+      heldImages[url] = img;              /* 保留 decoded bitmap，避免進場前被回收 */
+      img.decoding = 'async';
+      img.src = url;
+      function ready() { resolve(img); }
+      function failed() { reject(new Error('Image failed to load: ' + url)); }
+      if (img.decode) {
+        img.decode().then(ready, function () {
+          if (img.complete && img.naturalWidth) ready();
+          else { img.addEventListener('load', ready, { once: true }); img.addEventListener('error', failed, { once: true }); }
+        });
+      } else {
+        if (img.complete && img.naturalWidth) ready();
+        else { img.addEventListener('load', ready, { once: true }); img.addEventListener('error', failed, { once: true }); }
+      }
+    });
+    return imageJobs[url];
+  }
+  function nextFrame() { return new Promise(function (resolve) { requestAnimationFrame(function () { resolve(); }); }); }
+  function currentElevatorImage() {
+    return isM() ? '/assets/about-lift/lk-m-elevator.webp?v=g1' : '/assets/about-lift/lk-elevator-d2.webp?v=d2';
+  }
+  function ensureGPage(n) {
+    var url = G_IMAGES[n];
+    if (!url) return Promise.resolve();
+    return loadAndDecode(url).then(function () {
+      if (n > 1) root.style.setProperty('--lkl-g-p' + n, 'url("' + url + '")');
+      if (!gReady[n]) {
+        gReady[n] = true;
+        if (window.performance && performance.mark) performance.mark('lkl-g-p' + n + '-decoded');
+      }
+    });
+  }
+  function idleTask(fn) {
+    if ('requestIdleCallback' in window) return requestIdleCallback(fn, { timeout: 1800 });
+    return setTimeout(fn, 160);
+  }
+  function preloadRemainingG(n) {
+    if (n > 5) return;
+    idleTask(function () {
+      ensureGPage(n).then(function () { preloadRemainingG(n + 1); }, function () { /* 翻頁時會再試 */ });
+    });
+  }
+  function startGIdlePreload() {
+    if (gIdleStarted) return;
+    gIdleStarted = true;
+    preloadRemainingG(2);
+  }
+  function setGPageNow(n) {
+    gPageIntent++;
+    $('.lkl-gpages', scene('G')).setAttribute('data-page', String(n));
+  }
+  async function openGPage(n) {
+    n = +n;
+    var intent = ++gPageIntent;
+    await ensureGPage(n);
+    await nextFrame();                    /* CSS background 已掛上後再顯示，不讓第一次翻頁撞 decode */
+    if (intent !== gPageIntent) return;
+    $('.lkl-gpages', scene('G')).setAttribute('data-page', String(n));
+  }
+  async function prepareGLayers() {
+    root.classList.add('is-layer-prep');
+    await nextFrame();
+    await nextFrame();                    /* 至少留一個完整 frame commit 合成層，再開始既有 transition */
+    if (window.performance && performance.mark) performance.mark('lkl-g-layers-prepared');
+  }
+  function clearGLayers() { root.classList.remove('is-layer-prep'); }
+
   /* 文字層跟著畫面縮放 */
   if ('ResizeObserver' in window) {
     var ro = new ResizeObserver(function (entries) {
@@ -117,8 +202,10 @@
   }
 
   async function stepOut() {
+    if (st.at === 'G' && !root.classList.contains('is-layer-prep')) await prepareGLayers();
+    if (st.at === 'G' && window.performance && performance.mark) performance.mark('lkl-g-step-out');
     root.classList.add('is-out'); st.out = true; await wait(1150);
-    if (st.at === 'G') roamG(true);
+    if (st.at === 'G') { roamG(true); clearGLayers(); startGIdlePreload(); }
   }
   /* G（直式手機）：走出電梯後改成可左右瀏覽的橫式 showroom，捲到與原本置中相同的位置，畫面不跳 */
   function roamG(on) {
@@ -128,9 +215,6 @@
     var off = (cam.offsetWidth - sc.clientWidth) / 2;
     sc.classList.add('is-roam');
     sc.scrollLeft = Math.max(0, off);
-  }
-  function setGPage(n) {
-    $('.lkl-gpages', scene('G')).setAttribute('data-page', String(n));
   }
   /* 回電梯前先回到頁面頂端：走出電梯後頁面可以往下捲，回電梯時要讓電梯完整在畫面內 */
   async function toTop() {
@@ -227,11 +311,14 @@
     narrHide();
     await toTop();
     roamG(false);
-    if (st.at === 'G') setGPage(1);        /* 離開 G：G 內部頁面回到 P1，不影響電梯狀態 */
+    if (st.at === 'G') setGPageNow(1);     /* 離開 G：G 內部頁面回到 P1，不影響電梯狀態 */
     if (st.zoom) { camReset(st.at, 1100); st.zoom = false; await wait(1000); }
+    if (st.at === 'G') await prepareGLayers();
     var settled = carSettled();
+    if (st.at === 'G' && window.performance && performance.mark) performance.mark('lkl-g-step-in');
     root.classList.remove('is-out'); st.out = false;
     await settled;
+    if (st.at === 'G') clearGLayers();
   }
   async function returnToElevator() {
     if (st.busy || !st.out) return;
@@ -267,11 +354,17 @@
     await wait(480);
 
     st.at = f;
-    if (f === 'G') setGPage(1);            /* 抵達 G：門後與進場都先看到 P1 */
+    if (f === 'G') {
+      setGPageNow(1);                       /* 抵達 G：門後與進場都先看到 P1 */
+      await Promise.all([ensureGPage(1), loadAndDecode(currentElevatorImage())]);
+    }
     showScene(f);
     root.setAttribute('data-at', f);
     if (f === 'RF') setCatState(0);
 
+    if (f === 'G') await prepareGLayers(); /* 門仍關閉時先完成 decode、scene 與 layer commit */
+
+    if (f === 'G' && window.performance && performance.mark) performance.mark('lkl-g-door-open');
     root.classList.add('is-open'); st.open = true;
     await wait(1100);
     await stepOut();
@@ -371,7 +464,7 @@
     if (t.matches('.lkl-call')) { goTo(t.getAttribute('data-floor')); return; }
     if (t.matches('.lkl-return')) { returnToElevator(); return; }
     var gn = t.closest('.lkl-gnav');
-    if (gn && !gn.disabled) { setGPage(gn.getAttribute('data-gpage')); if (scene('G').classList.contains('is-roam')) scene('G').scrollTo({ left: 0, behavior: 'smooth' }); return; }
+    if (gn && !gn.disabled) { openGPage(gn.getAttribute('data-gpage')); if (scene('G').classList.contains('is-roam')) scene('G').scrollTo({ left: 0, behavior: 'smooth' }); return; }
     if (t.matches('.lkl-narr-next')) { narrNext(); return; }
     if (t.matches('.lkl-unzoom')) { walkBack(); return; }
     var a = t.getAttribute('data-action');
