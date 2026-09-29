@@ -10,8 +10,33 @@ window.setActivePage=function(page,btn){
   window.scrollTo(0,0);
 };
 
+function isClauseCard(card){
+  return !!(card && card.matches('.clause-library .card') &&
+    card.querySelector('.body .clause.zh') &&
+    card.querySelector('.body .clause.en-copy'));
+}
+
+function ensureClausePreview(card){
+  if(!isClauseCard(card)) return;
+  const body=card.querySelector('.body');
+  const zh=body.querySelector('.clause.zh');
+  const en=body.querySelector('.clause.en-copy');
+  let preview=body.querySelector('.clause-preview');
+  if(!preview){
+    preview=document.createElement('div');
+    preview.className='clause-preview';
+    preview.innerHTML='<div class="preview-zh"></div><div class="preview-en"></div>';
+    body.insertBefore(preview,zh);
+  }
+  const pzh=preview.querySelector('.preview-zh');
+  const pen=preview.querySelector('.preview-en');
+  if(!pzh || !pen) return;
+  pzh.textContent=zh.innerText.replace(/\s+/g,' ').trim();
+  pen.textContent=en.innerText.replace(/\s+/g,' ').trim();
+}
+
 function toggle(card){
-  if(!card || card.classList.contains('short-clause')) return;
+  if(!isClauseCard(card)) return;
   card.classList.toggle('open');
   const arrow=card.querySelector('.arrow');
   if(arrow){
@@ -97,13 +122,17 @@ function fallbackCopy(text,done){
 }
 
 document.addEventListener('DOMContentLoaded',function(){
-  document.querySelectorAll('.long-clause').forEach(function(card){
+  document.querySelectorAll('.clause-library .card').forEach(function(card){
+    if(!isClauseCard(card)) return;
+    ensureClausePreview(card);
     const head=card.querySelector('.cardhead');
     if(head) head.onclick=function(event){
       // The arrow has its own inline toggle handler; do not toggle again on bubbling.
       if(event.target.closest('.clause-expand')) return;
-      // Keep crawlable semantic links, but make the full header a toggle on mobile.
-      if(window.matchMedia('(max-width:700px)').matches && event.target.closest('.clause-semantic-link')){
+      const semanticLink=event.target.closest('.clause-semantic-link');
+      if(semanticLink){
+        // Keep desktop semantic navigation; mobile card headers disclose in place.
+        if(!window.matchMedia('(max-width:700px)').matches) return;
         event.preventDefault();
       }
       toggle(card);

@@ -72,6 +72,10 @@
   transition: transform 1.15s cubic-bezier(.6,0,.3,1);
 }
 .lkl.is-out .lkl-doorset { transform: scale(1.45); }
+/* 只在 G 進出電梯的 transition boundary 前短暫建立合成層；JS 會在動畫完成後移除。 */
+.lkl.is-layer-prep .lkl-car { will-change: transform, filter; }
+.lkl.is-layer-prep .lkl-doorset,
+.lkl.is-layer-prep .lkl-scene[data-floor="G"].is-current { will-change: transform; }
 /* 走出電梯後：舞台接管整個內容寬度，不再受電梯視窗限制 */
 .lkl.is-out .lkl-stage { width: 100%; }
 
@@ -157,15 +161,15 @@
 .lkl-scene[data-floor="RF"] .lkl-bg { background-image: var(--lkl-img-rf); background-size: cover; }
 .lkl-scene[data-floor="P2"] .lkl-bg { background-image: var(--lkl-img-p2); }
 .lkl-scene[data-floor="P3"] .lkl-bg { background-image: var(--lkl-img-p3); }
-/* G：P1－P4 定稿 reference 完整顯示（1366×768，不裁切）；同一樓層內淡入切換 */
+/* G：P1－P5 定稿 reference 完整顯示（1366×768，不裁切）；同一樓層內淡入切換 */
 .lkl-scene[data-floor="G"] .lkl-cam { width: max(100%, calc(100cqh * 1366 / 768)); aspect-ratio: 1366 / 768; }
 .lkl-gpages { position: absolute; inset: 0; }
 .lkl-gpage { position: absolute; inset: 0; background: center / 100% 100% no-repeat; transition: opacity .35s ease, visibility .35s; }
 .lkl-gpage.is-p1 { background-image: url(/assets/about-lift/lk-g-p1.webp?v=g6); }
-.lkl-gpage.is-p2 { background-image: url(/assets/about-lift/lk-g-p2.png?v=g8); opacity: 0; visibility: hidden; }
-.lkl-gpage.is-p3 { background-image: url(/assets/about-lift/lk-g-p3.png?v=g7); opacity: 0; visibility: hidden; }
-.lkl-gpage.is-p4 { background-image: url(/assets/about-lift/lk-g-p4.png?v=g7); opacity: 0; visibility: hidden; }
-.lkl-gpage.is-p5 { background-image: url(/assets/about-lift/lk-g-p5.png?v=g8); opacity: 0; visibility: hidden; }
+.lkl-gpage.is-p2 { background-image: var(--lkl-g-p2, none); opacity: 0; visibility: hidden; }
+.lkl-gpage.is-p3 { background-image: var(--lkl-g-p3, none); opacity: 0; visibility: hidden; }
+.lkl-gpage.is-p4 { background-image: var(--lkl-g-p4, none); opacity: 0; visibility: hidden; }
+.lkl-gpage.is-p5 { background-image: var(--lkl-g-p5, none); opacity: 0; visibility: hidden; }
 .lkl-gpages[data-page="2"] .is-p1 { opacity: 0; visibility: hidden; }
 .lkl-gpages[data-page="2"] .is-p2 { opacity: 1; visibility: visible; }
 .lkl-gpages[data-page="3"] .is-p1,

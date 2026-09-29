@@ -17,6 +17,12 @@ NEW_17 = ('COI-01', 'COI-02', 'COI-03', 'SLA-01', 'SLA-02', 'SLA-03',
           'PT-05', 'PT-06', 'WT-01', 'WT-02', 'WT-03', 'PD-01', 'PD-02',
           'PD-03', 'PD-04', 'RL-01', 'RL-02')
 SERVICE = ('about', 'contract-drafting', 'contract-review', 'legal-translation')
+SERVICE_STATE = {
+    'about': ('about', 'about-page-active'),
+    'contract-drafting': ('draft', 'draft-page-active'),
+    'contract-review': ('review', 'review-page-active'),
+    'legal-translation': ('translate', 'translate-page-active'),
+}
 
 
 def baseline(path: str) -> str:
@@ -66,8 +72,8 @@ def main(expected_count: int) -> None:
     check(sum(mode in ('短版', '長版') for mode in mode_by_code.values()) == expected_count,
           'invalid mode label')
     if expected_count == 98:
-        check(sum(mode == '短版' for mode in mode_by_code.values()) == 48, 'short mode count')
-        check(sum(mode == '長版' for mode in mode_by_code.values()) == 50, 'long mode count')
+        check(sum(mode == '短版' for mode in mode_by_code.values()) == 46, 'short mode count')
+        check(sum(mode == '長版' for mode in mode_by_code.values()) == 52, 'long mode count')
     check(mode_by_code['MI-12'] == '短版', 'MI-12 must be short')
     check(set(NEW_17) <= set(expected_codes), 'new 17 clauses missing')
     approved = {code(item): item for item in cards(baseline('clausebank/index.html'))}
@@ -160,13 +166,17 @@ def main(expected_count: int) -> None:
     for name in SERVICE:
         relative = f'{name}/index.html'
         page = (ROOT / relative).read_text(encoding='utf-8')
+        active_section, body_class = SERVICE_STATE[name]
         check(not cards(page) and '一般版' not in page, f'legacy service cards: {relative}')
         check(not re.search(r'#vault\s+\.|\.clause-library\b|function (?:filterCards|copyClause|setLanguage)\b', page),
               f'legacy service styles/scripts: {relative}')
         check(seo_signature(page) == seo_signature(baseline(relative)),
               f'service SEO head/H1 changed: {relative}')
+        check(f'<body class="{body_class}">' in page,
+              f'initial service body state missing: {relative} {body_class}')
         for section in ('draft', 'review', 'translate', 'about'):
-            marker = f'<section class="page" id="{section}">'
+            state = 'page active' if section == active_section else 'page'
+            marker = f'<section class="{state}" id="{section}">'
             check(marker in page, f'visible service section missing: {relative} {section}')
     sitemap = ElementTree.fromstring((ROOT / 'sitemap.xml').read_text(encoding='utf-8'))
     urls = [node.text for node in sitemap.iter() if node.tag.endswith('loc')]
