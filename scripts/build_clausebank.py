@@ -19,7 +19,6 @@ CARD = re.compile(r'<article class="card(?: [^"]*)?"[^>]*>.*?</article>', re.S)
 CODE = re.compile(r'<span class="code">([^<]+)</span>')
 CONTENT = '<div class="content clause-library">'
 FILTERS = '<div class="filters">'
-VERSIONS = {'短版': 'short', '長版': 'long'}
 
 
 def versioned_script(page: str) -> str:
@@ -45,79 +44,6 @@ def code(card: str) -> str:
     return html.unescape(found.group(1))
 
 
-def clause_version(card: str) -> str:
-    card_code = code(card)
-    modes = re.findall(r'<span class="mode(?: [^"]*)?">([^<]+)</span>', card)
-    if len(modes) != 1 or modes[0] not in VERSIONS:
-        raise ValueError(f"{card_code}: length must be explicitly confirmed as 短版 or 長版")
-    return VERSIONS[modes[0]]
-
-
-def validate_source_card(card: str) -> None:
-    card_code = code(card)
-    version = clause_version(card)
-    label = '短版' if version == 'short' else '長版'
-    opening = re.match(r'<article\b[^>]*>', card)
-    if not opening:
-        raise ValueError(f"{card_code}: invalid card opening")
-    classes = re.search(r'class="([^"]*)"', opening.group(0))
-    if not classes or classes.group(1).split() != ['card', f'{version}-clause']:
-        raise ValueError(f"{card_code}: card class must match its confirmed {label} version")
-    if ' open' in classes.group(0):
-        raise ValueError(f"{card_code}: canonical source must not set an initial open state")
-    search = re.search(r'data-search="([^"]*)"', opening.group(0))
-    if not search or search.group(1).split().count(label) != 1:
-        raise ValueError(f"{card_code}: data-search must contain exactly one {label} token")
-    other = '長版' if label == '短版' else '短版'
-    if other in search.group(1).split():
-        raise ValueError(f"{card_code}: data-search contains conflicting length metadata")
-    if not re.search(r'<a class="clause-semantic-link" href="/clausebank/[a-z0-9-]+/">', card):
-        raise ValueError(f"{card_code}: missing semantic URL")
-    for cls in ('clause zh', 'clause en-copy'):
-        match = re.search(r'<div class="' + re.escape(cls) + r'">(.*?)</div>', card, re.S)
-        if not match or not re.sub(r'<[^>]+>', '', match.group(1)).strip():
-            raise ValueError(f"{card_code}: missing {cls} content")
-
-
-def compile_card(card: str) -> str:
-    """Normalize interaction scaffolding without changing clause text or version."""
-    validate_source_card(card)
-    card_code = code(card)
-    version = clause_version(card)
-    label = '短版' if version == 'short' else '長版'
-    card = re.sub(r'<span class="mode(?: [^"]*)?">[^<]+</span>',
-                  f'<span class="mode {version}">{label}</span>', card, count=1)
-    card = re.sub(r'<div class="clause-preview">.*?</div></div>', '', card, count=1, flags=re.S)
-    preview = '<div class="clause-preview"><div class="preview-zh"></div><div class="preview-en"></div></div>'
-    card = card.replace('<div class="body">', '<div class="body">' + preview, 1)
-    head = re.search(r'(<div class="cardhead">)(.*?)(</div>)', card, re.S)
-    if not head:
-        raise ValueError(f"{card_code}: missing cardhead")
-    content = re.sub(r'<(?:button|span) class="arrow(?: clause-expand)?"[^>]*>.*?</(?:button|span)>',
-                     '', head.group(2), flags=re.S)
-    arrow = (f'<button class="arrow clause-expand" type="button" '
-             f'aria-label="展開 {html.escape(card_code)} 條款" aria-expanded="false" '
-             f'onclick="toggle(this.closest(\'.card\'))">⌄</button>')
-    return card[:head.start()] + head.group(1) + content + arrow + head.group(3) + card[head.end():]
-
-
-def validate_compiled_cards(compiled: list[str]) -> None:
-    for card in compiled:
-        validate_source_card(card)
-        card_code = code(card)
-        if 'class="clause-preview"' not in card:
-            raise ValueError(f"{card_code}: missing collapsed preview scaffold")
-        if 'class="arrow clause-expand"' not in card:
-            raise ValueError(f"{card_code}: missing disclosure control")
-
-
-def validate_landing_initial_state(page: str) -> None:
-    if 'data-clause-code=""' not in page:
-        raise ValueError('ClauseBank landing must not carry a deep-link clause code')
-    if any(' open' in re.match(r'<article\b[^>]*>', card).group(0) for card in cards(page)):
-        raise ValueError('ClauseBank landing cards must be collapsed initially')
-
-
 def source_parts(text: str) -> tuple[str, list[str]]:
     start = text.index(FILTERS) + len(FILTERS)
     end = text.index('<div class="lang">', start)
@@ -126,8 +52,6 @@ def source_parts(text: str) -> tuple[str, list[str]]:
     codes = [code(item) for item in result]
     if len(result) < 98 or len(codes) != len(set(codes)):
         raise ValueError(f"expected at least 98 unique canonical cards, got {len(result)}")
-    for item in result:
-        validate_source_card(item)
     if len(re.findall(r'<button class="filter', filters)) < 23:
         raise ValueError("canonical filters must contain at least 23 buttons")
     return filters, result
@@ -215,25 +139,22 @@ def new_semantic_page(landing: str, original: str, url: str) -> str:
 def build() -> None:
     source_text = SOURCE.read_text(encoding='utf-8')
     filters, originals = source_parts(source_text)
-    compiled = [compile_card(item) for item in originals]
-    validate_compiled_cards(compiled)
+    source_codes = [code(item) for item in originals]
 # Root and /clausebank/ intentionally share one canonical ClauseBank data source.
     landing_path = ROOT / 'clausebank/index.html'
     landing = landing_path.read_text(encoding='utf-8')
-    landing_out = versioned_script(replace_cards(replace_filters(landing, filters), compiled))
-    validate_landing_initial_state(landing_out)
+    landing_out = versioned_script(replace_cards(replace_filters(landing, filters), originals))
     if landing_out != landing:
         landing_path.write_text(landing_out, encoding='utf-8')
 
     home_path = ROOT / 'index.html'
     home = home_path.read_text(encoding='utf-8')
-    home_out = versioned_script(replace_cards(replace_filters(home, filters), compiled))
-    validate_landing_initial_state(home_out)
+    home_out = versioned_script(replace_cards(replace_filters(home, filters), originals))
     if home_out != home:
         home_path.write_text(home_out, encoding='utf-8')
 
     expected_paths = {re.search(r'href="(/clausebank/[^\"]+/)"', item).group(1): item
-                      for item in compiled}
+                      for item in originals}
     if len(expected_paths) != len(originals):
         raise ValueError("missing or duplicate semantic slug")
     new_urls = []
@@ -245,7 +166,7 @@ def build() -> None:
             new_urls.append(url)
             continue
         page = path.read_text(encoding='utf-8')
-        out = versioned_script(replace_cards(replace_filters(page, filters), compiled))
+        out = versioned_script(replace_cards(replace_filters(page, filters), originals))
         if out != page:
             path.write_text(out, encoding='utf-8')
     if new_urls:

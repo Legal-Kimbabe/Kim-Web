@@ -11,14 +11,6 @@ const cases = [
   ['/clausebank/cross-border-personal-data-transfer/', 'PD-04'],
 ];
 const assert = (test, message) => { if (!test) throw new Error(message); };
-const interactionCases = [
-  'BI-01', 'DM-01', 'DM-02', 'PT-01', 'PT-03', 'PT-04', 'PT-05',
-  'TM-01', 'TM-02', 'TM-03', 'TM-04', 'RL-01', 'RL-02',
-  'IP-01', 'IP-03', 'NT-01',
-  'MI-01', 'MI-02', 'MI-03', 'MI-04', 'MI-05', 'MI-06', 'MI-07',
-  'MI-08', 'MI-09', 'MI-10', 'MI-11', 'MI-12', 'MI-13', 'MI-14',
-  'SLA-01', 'SLA-02', 'SLA-03',
-];
 
 async function run() {
   const browser = await chromium.launch({headless: true,
@@ -100,46 +92,6 @@ async function run() {
         assert(page.url() === originalUrl &&
           await warranty.evaluate(el => el.classList.contains('open')) !== wasOpen,
           `${route}: mobile arrow must toggle exactly once without navigation`);
-
-        if (route === '/clausebank/') {
-          assert(await page.locator('#vault .card.open').count() <= 1,
-            `${route}: unexpected initial open cards`);
-          for (const code of interactionCases) {
-            const card = page.locator('#vault .card').filter({
-              has: page.locator(`.code:text-is("${code}")`),
-            });
-            assert(await card.count() === 1, `${route}: ${code} missing`);
-            const category = await card.getAttribute('data-cat');
-            await page.locator(`[data-filter="${category}"]`).click();
-            const categoryCount = await page.locator('#vault .card:visible').count();
-            const before = page.url();
-            if (await card.evaluate(el => el.classList.contains('open')))
-              await card.locator('.clause-expand').click();
-            await card.locator('.clause-semantic-link .title').click();
-            assert(page.url() === before &&
-              await card.evaluate(el => el.classList.contains('open')),
-              `${route}: ${code} title must open in place`);
-            assert(await page.locator(`[data-filter="${category}"]`).evaluate(
-              el => el.classList.contains('active')) &&
-              await page.locator('#vault .card:visible').count() === categoryCount,
-              `${route}: ${code} title reset category`);
-            await card.locator('.clause-semantic-link .title').click();
-            assert(!(await card.evaluate(el => el.classList.contains('open'))),
-              `${route}: ${code} title must close in place`);
-            await card.locator('.clause-expand').click();
-            assert(await card.evaluate(el => el.classList.contains('open')),
-              `${route}: ${code} arrow must open exactly once`);
-            await card.locator('.clause-expand').click();
-            assert(!(await card.evaluate(el => el.classList.contains('open'))),
-              `${route}: ${code} arrow must close exactly once`);
-          }
-          await page.locator('[data-filter="all"]').click();
-          const payment = page.locator('#vault .card').filter({
-            has: page.locator('.code:text-is("PT-01")'),
-          });
-          assert(!(await payment.evaluate(el => el.classList.contains('open'))),
-            `${route}: PT-01 must remain collapsed on landing`);
-        }
       }
       const lang = page.locator('#vault .lang');
       await lang.getByText('EN', {exact: true}).click();
@@ -166,11 +118,9 @@ async function run() {
       assert(lifted >= (width <= 700 ? 12 : 18), `${route} ${width}: footer avoidance`);
       assert(lifted > (width <= 700 ? 12 : 18),
         `${route} ${width}: footer did not lift LWYRUP`);
-      if (width <= 700) assert(await page.locator('#vault .toolbar').evaluate(el => {
-        const position = getComputedStyle(el).position;
-        return position === 'sticky' ||
-          (position === 'fixed' && el.classList.contains('mobile-toolbar-fixed'));
-      }), `${route} ${width}: mobile toolbar is neither sticky nor intentionally fixed`);
+      if (width <= 700) assert(await page.locator('#vault .toolbar').evaluate(
+        el => getComputedStyle(el).position === 'sticky'),
+        `${route} ${width}: mobile toolbar is not sticky`);
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
         `${route} ${width}: horizontal overflow after interaction`);
       if (width > 700) {

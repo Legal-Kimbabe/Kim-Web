@@ -1,7 +1,6 @@
 (function () {
   const items = [
     { path: '/clausebank/', zh: '條款金庫', en: 'ClauseBank', mobileEn: 'CLAUSE BANK' },
-    { path: '/about/?floor=G', zh: '免費下載', en: 'Free Download', mobileEn: 'FREE DOWNLOAD' },
     { path: '/contract-drafting/', zh: '契約撰寫', en: 'Contract Drafting' },
     { path: '/contract-review/', zh: '契約健檢', en: 'Contract Checkup' },
     { path: '/legal-translation/', zh: '法律翻譯', en: 'Legal Translation' },
@@ -11,7 +10,6 @@
   function currentPath() {
     const path = window.location.pathname.replace(/\/index\.html$/, '/');
     if (path.startsWith('/clausebank/')) return '/clausebank/';
-    if (path === '/about/' && new URLSearchParams(window.location.search).get('floor') === 'G') return '/about/?floor=G';
     return items.some(item => item.path === path) ? path : '';
   }
 
@@ -29,21 +27,6 @@
     secondary.textContent = mobile ? item.zh : item.en;
     link.append(primary, secondary);
     return link;
-  }
-
-  function ensureFreeDownloadLinks(header, overlay) {
-    const freeDownload = items.find(item => item.path === '/about/?floor=G');
-    const current = currentPath();
-    [
-      { nav: header && header.querySelector('.editorial-desktop-nav'), mobile: false },
-      { nav: overlay && overlay.querySelector('.editorial-service-menu'), mobile: true }
-    ].forEach(entry => {
-      if (!entry.nav || entry.nav.querySelector('a[href="/about/?floor=G"]')) return;
-      const link = navLink(freeDownload, entry.mobile, current);
-      const first = entry.nav.querySelector('a');
-      if (first) first.insertAdjacentElement('afterend', link);
-      else entry.nav.append(link);
-    });
   }
 
   function buildHeader() {
@@ -139,8 +122,6 @@
       overlay = built.overlay;
       if (!document.querySelector('script[src*="clausebank.js"]')) enhance(header, toggle, overlay);
     }
-
-    ensureFreeDownloadLinks(header, overlay);
 
     document.documentElement.classList.add('editorial-header-mounted');
   }
