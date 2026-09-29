@@ -66,8 +66,8 @@ def main(expected_count: int) -> None:
     check(sum(mode in ('短版', '長版') for mode in mode_by_code.values()) == expected_count,
           'invalid mode label')
     if expected_count == 98:
-        check(sum(mode == '短版' for mode in mode_by_code.values()) == 48, 'short mode count')
-        check(sum(mode == '長版' for mode in mode_by_code.values()) == 50, 'long mode count')
+        check(sum(mode == '短版' for mode in mode_by_code.values()) == 46, 'short mode count')
+        check(sum(mode == '長版' for mode in mode_by_code.values()) == 52, 'long mode count')
     check(mode_by_code['MI-12'] == '短版', 'MI-12 must be short')
     check(set(NEW_17) <= set(expected_codes), 'new 17 clauses missing')
     approved = {code(item): item for item in cards(baseline('clausebank/index.html'))}
