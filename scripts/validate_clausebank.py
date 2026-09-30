@@ -99,6 +99,7 @@ def main(expected_count: int) -> None:
     pages = ['index.html', 'clausebank/index.html']
     pages += [url.lstrip('/') + 'index.html' for url in slugs]
     js_version = hashlib.sha256((ROOT / 'clausebank/assets/clausebank.js').read_bytes()).hexdigest()[:12]
+    header_version = hashlib.sha256((ROOT / 'assets/editorial-header.js').read_bytes()).hexdigest()[:12]
     for relative in pages:
         path = ROOT / relative
         check(path.is_file(), f'missing output: {relative}')
@@ -111,6 +112,8 @@ def main(expected_count: int) -> None:
         check('一般版' not in page, f'legacy mode label: {relative}')
         check(f'clausebank.js?v={js_version}' in page,
               f'shared JS cache version mismatch: {relative}')
+        check(f'editorial-header.js?v={header_version}' in page,
+              f'editorial header cache version mismatch: {relative}')
         check(not re.search(r'(?m)^\s*<\s*$', page), f'stray angle bracket: {relative}')
         check(len(re.findall(r'<button class="filter', page)) == 23,
               f'filter count: {relative}')
@@ -150,6 +153,12 @@ def main(expected_count: int) -> None:
             check('<title></title>' not in page and '<meta name="description" content=""' not in page,
                   f'empty SEO metadata: {relative}')
             check('noindex' not in page.lower(), f'not indexable: {relative}')
+            check('<header class="editorial-site-header">' in page
+                  and '<div class="top-brand">' not in page
+                  and '<nav aria-label="Main navigation" class="main-nav">' not in page,
+                  f'legacy semantic wrapper: {relative}')
+            check('src="../assets/images/clausebank-hero-final.png"' in page,
+                  f'semantic page hero differs from canonical landing: {relative}')
     home_text = (ROOT / 'index.html').read_text(encoding='utf-8')
     alias_text = (ROOT / 'clausebank/index.html').read_text(encoding='utf-8')
     check(home_text.count('id="vault"') == 1, 'homepage vault missing')
@@ -174,10 +183,15 @@ def main(expected_count: int) -> None:
               f'service SEO head/H1 changed: {relative}')
         check(f'<body class="{body_class}">' in page,
               f'initial service body state missing: {relative} {body_class}')
+        check(f'editorial-header.js?v={header_version}' in page,
+              f'editorial header cache version mismatch: {relative}')
         for section in ('draft', 'review', 'translate', 'about'):
             state = 'page active' if section == active_section else 'page'
             marker = f'<section class="{state}" id="{section}">'
             check(marker in page, f'visible service section missing: {relative} {section}')
+    header_script = (ROOT / 'assets/editorial-header.js').read_text(encoding='utf-8')
+    check("path: '/about/?floor=G'" in header_script,
+          'FREE DOWNLOAD route missing from editorial navigation')
     sitemap = ElementTree.fromstring((ROOT / 'sitemap.xml').read_text(encoding='utf-8'))
     urls = [node.text for node in sitemap.iter() if node.tag.endswith('loc')]
     check(len(urls) == len(set(urls)) == expected_count + 5,

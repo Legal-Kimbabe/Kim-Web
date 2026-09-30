@@ -131,8 +131,8 @@ document.addEventListener('DOMContentLoaded',function(){
       if(event.target.closest('.clause-expand')) return;
       const semanticLink=event.target.closest('.clause-semantic-link');
       if(semanticLink){
-        // Keep desktop semantic navigation; mobile card headers disclose in place.
-        if(!window.matchMedia('(max-width:700px)').matches) return;
+        // Semantic URLs remain crawlable/directly accessible, while title clicks
+        // disclose the card in place at every viewport.
         event.preventDefault();
       }
       toggle(card);

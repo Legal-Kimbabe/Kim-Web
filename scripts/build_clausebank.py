@@ -23,13 +23,16 @@ VERSIONS = {'短版': 'short', '長版': 'long'}
 
 
 def versioned_script(page: str) -> str:
-    """Content-address the one shared implementation to avoid stale CDN JS."""
+    """Content-address shared implementations to avoid stale CDN/browser JS."""
     version = hashlib.sha256((ROOT / 'clausebank/assets/clausebank.js').read_bytes()).hexdigest()[:12]
+    header_version = hashlib.sha256((ROOT / 'assets/editorial-header.js').read_bytes()).hexdigest()[:12]
     page = re.sub(r'(src="(?:/clausebank/assets/|(?:\.\./)?assets/)clausebank\.js)(?:\?v=[^"]*)?("\s*>)',
                   lambda match: match.group(1) + '?v=' + version + match.group(2), page)
+    page = re.sub(r'(src="/assets/editorial-header\.js)(?:\?v=[^"]*)?("\s+defer></script>)',
+                  lambda match: match.group(1) + '?v=' + header_version + match.group(2), page)
     if '/assets/editorial-header.css' not in page:
         shared_header = ('<link rel="stylesheet" href="/assets/editorial-header.css?v=20260923a"/>\n'
-                         '<script src="/assets/editorial-header.js?v=20260923a" defer></script>\n')
+                         f'<script src="/assets/editorial-header.js?v={header_version}" defer></script>\n')
         page = page.replace('</head>', shared_header + '</head>', 1)
     return page
 
@@ -212,6 +215,23 @@ def new_semantic_page(landing: str, original: str, url: str) -> str:
     return page
 
 
+def refresh_semantic_page(landing: str, existing: str, original: str) -> str:
+    """Use the canonical landing shell while preserving an indexed page's SEO head/H1."""
+    card_code = code(original)
+    head_end = existing.index('</head>') + len('</head>')
+    head = existing[:head_end]
+    existing_h1 = re.search(r'<h1 class="seo-site-title">.*?</h1>', existing, re.S)
+    if not existing_h1:
+        raise ValueError(f'{card_code}: semantic page is missing its indexed H1')
+    body = landing[landing.index('<body'):]
+    body = body.replace('data-clause-code=""', f'data-clause-code="{card_code}"', 1)
+    body = re.sub(r'<h1 class="seo-site-title">.*?</h1>', existing_h1.group(0), body,
+                  count=1, flags=re.S)
+    # The canonical landing lives one directory above each semantic page.
+    body = re.sub(r'((?:src|href)=")assets/', r'\1../assets/', body)
+    return head + '\n' + body
+
+
 def build() -> None:
     source_text = SOURCE.read_text(encoding='utf-8')
     filters, originals = source_parts(source_text)
@@ -245,7 +265,7 @@ def build() -> None:
             new_urls.append(url)
             continue
         page = path.read_text(encoding='utf-8')
-        out = versioned_script(replace_cards(replace_filters(page, filters), compiled))
+        out = versioned_script(refresh_semantic_page(landing_out, page, expected_paths[url]))
         if out != page:
             path.write_text(out, encoding='utf-8')
     if new_urls:

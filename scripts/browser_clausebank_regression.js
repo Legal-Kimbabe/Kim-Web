@@ -11,14 +11,83 @@ const cases = [
   ['/clausebank/cross-border-personal-data-transfer/', 'PD-04'],
 ];
 const assert = (test, message) => { if (!test) throw new Error(message); };
-const interactionCases = [
-  'BI-01', 'DM-01', 'DM-02', 'PT-01', 'PT-03', 'PT-04', 'PT-05',
-  'TM-01', 'TM-02', 'TM-03', 'TM-04', 'RL-01', 'RL-02',
-  'IP-01', 'IP-03', 'NT-01',
-  'MI-01', 'MI-02', 'MI-03', 'MI-04', 'MI-05', 'MI-06', 'MI-07',
-  'MI-08', 'MI-09', 'MI-10', 'MI-11', 'MI-12', 'MI-13', 'MI-14',
-  'SLA-01', 'SLA-02', 'SLA-03',
-];
+
+async function runTitleClickMatrix(browser, width, height) {
+  const context = await browser.newContext({viewport: {width, height}});
+  await context.route('https://vvkvwxjerjejrenkteeg.supabase.co/**', request =>
+    request.fulfill({status: 200, contentType: 'application/json', body: '[]'}));
+
+  const seed = await context.newPage();
+  await seed.goto(base + '/clausebank/', {waitUntil: 'load'});
+  const codes = await seed.locator('#vault .card .code').allTextContents();
+  assert(codes.length === 98 && new Set(codes).size === 98,
+    `${width}: expected 98 unique title-click cases`);
+  for (const code of ['SLA-01', 'SLA-02', 'SLA-03']) {
+    const card = seed.locator('#vault .card').filter({
+      has: seed.locator(`.code:text-is("${code}")`),
+    });
+    assert(await card.evaluate(el => el.classList.contains('long-clause')),
+      `${width}: ${code} must remain long-clause`);
+  }
+  await seed.close();
+
+  for (const code of codes) {
+    const page = await context.newPage();
+    let documentNavigations = 0;
+    page.on('framenavigated', frame => {
+      if (frame === page.mainFrame()) documentNavigations++;
+    });
+    await page.goto(base + '/clausebank/', {waitUntil: 'load'});
+    documentNavigations = 0;
+
+    const card = page.locator('#vault .card').filter({
+      has: page.locator(`.code:text-is("${code}")`),
+    });
+    assert(await card.count() === 1, `${width}: ${code} missing`);
+    const category = await card.getAttribute('data-cat');
+    await page.locator(`[data-filter="${category}"]`).click();
+    const before = await page.evaluate(() => ({
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash,
+      hero: document.querySelector('header.hero img')?.getAttribute('src') || '',
+    }));
+    const visibleBefore = await page.locator('#vault .card:visible').count();
+    const wasOpen = await card.evaluate(el => el.classList.contains('open'));
+    assert(!wasOpen, `${width}: ${code} must begin collapsed`);
+
+    await card.locator('.clause-semantic-link').click();
+    await page.waitForTimeout(80);
+    const after = await page.evaluate(() => ({
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash,
+      hero: document.querySelector('header.hero img')?.getAttribute('src') || '',
+    }));
+    assert(JSON.stringify(after) === JSON.stringify(before),
+      `${width}: ${code} title changed URL or hero`);
+    assert(documentNavigations === 0, `${width}: ${code} title caused document navigation`);
+    assert(await card.evaluate(el => el.classList.contains('open')),
+      `${width}: ${code} title did not toggle open exactly once`);
+    assert(await page.locator(`[data-filter="${category}"]`).evaluate(
+      el => el.classList.contains('active')),
+      `${width}: ${code} title lost selected category`);
+    assert(!(await page.locator('[data-filter="all"]').evaluate(
+      el => el.classList.contains('active'))),
+      `${width}: ${code} title reactivated all clauses`);
+    assert(await page.locator('#vault .card:visible').count() === visibleBefore,
+      `${width}: ${code} title changed visible category results`);
+
+    await card.locator('.clause-semantic-link').click();
+    await page.waitForTimeout(80);
+    assert(documentNavigations === 0 &&
+      !(await card.evaluate(el => el.classList.contains('open'))),
+      `${width}: ${code} second title click did not collapse exactly once`);
+    await page.close();
+  }
+  await context.close();
+  console.log(`PASS ${width}x${height}: title click 98/98 local toggles`);
+}
 
 async function run() {
   const browser = await chromium.launch({headless: true,
@@ -104,35 +173,6 @@ async function run() {
         if (route === '/clausebank/') {
           assert(await page.locator('#vault .card.open').count() <= 1,
             `${route}: unexpected initial open cards`);
-          for (const code of interactionCases) {
-            const card = page.locator('#vault .card').filter({
-              has: page.locator(`.code:text-is("${code}")`),
-            });
-            assert(await card.count() === 1, `${route}: ${code} missing`);
-            const category = await card.getAttribute('data-cat');
-            await page.locator(`[data-filter="${category}"]`).click();
-            const categoryCount = await page.locator('#vault .card:visible').count();
-            const before = page.url();
-            if (await card.evaluate(el => el.classList.contains('open')))
-              await card.locator('.clause-expand').click();
-            await card.locator('.clause-semantic-link .title').click();
-            assert(page.url() === before &&
-              await card.evaluate(el => el.classList.contains('open')),
-              `${route}: ${code} title must open in place`);
-            assert(await page.locator(`[data-filter="${category}"]`).evaluate(
-              el => el.classList.contains('active')) &&
-              await page.locator('#vault .card:visible').count() === categoryCount,
-              `${route}: ${code} title reset category`);
-            await card.locator('.clause-semantic-link .title').click();
-            assert(!(await card.evaluate(el => el.classList.contains('open'))),
-              `${route}: ${code} title must close in place`);
-            await card.locator('.clause-expand').click();
-            assert(await card.evaluate(el => el.classList.contains('open')),
-              `${route}: ${code} arrow must open exactly once`);
-            await card.locator('.clause-expand').click();
-            assert(!(await card.evaluate(el => el.classList.contains('open'))),
-              `${route}: ${code} arrow must close exactly once`);
-          }
           await page.locator('[data-filter="all"]').click();
           const payment = page.locator('#vault .card').filter({
             has: page.locator('.code:text-is("PT-01")'),
@@ -173,16 +213,13 @@ async function run() {
       }), `${route} ${width}: mobile toolbar is neither sticky nor intentionally fixed`);
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
         `${route} ${width}: horizontal overflow after interaction`);
-      if (width > 700) {
-        await page.locator('[data-search^="WT-01 "] .clause-semantic-link').click();
-        assert(new URL(page.url()).pathname === '/clausebank/warranty-against-defects/',
-          `${route}: desktop semantic link did not navigate`);
-      }
       console.log(`PASS ${width}x${height} ${route}: 98 cards, UX, copy/count, no overflow`);
       tested++;
       await context.close();
     }
   }
+  await runTitleClickMatrix(browser, 1280, 900);
+  await runTitleClickMatrix(browser, 390, 844);
   await browser.close();
   console.log(`PASS ${tested} browser cases`);
 }
