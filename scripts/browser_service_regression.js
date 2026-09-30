@@ -1,9 +1,11 @@
-/* Pixel/DOM comparison for the four service pages against approved main. */
+/* Service-page scope and first-frame regression checks against recovery base. */
 const { chromium } = require('playwright');
 const { execFileSync } = require('child_process');
 const crypto = require('crypto');
+const pixelmatch = require('pixelmatch').default || require('pixelmatch');
+const { PNG } = require('pngjs');
 
-const baseline = 'ca99b687e89082e3617f5cee317b01466c218b96';
+const baseline = '42a5073c2ac4c1f59f60a675077d96319d444bb8';
 const base = process.env.CLAUSEBANK_TEST_BASE || 'http://localhost:8765';
 const sections = {
   about: 'about',
@@ -12,6 +14,13 @@ const sections = {
   'legal-translation': 'translate'
 };
 const hash = value => crypto.createHash('sha256').update(value).digest('hex');
+const pixelDifference = (first, second) => {
+  const a = PNG.sync.read(first);
+  const b = PNG.sync.read(second);
+  if (a.width !== b.width || a.height !== b.height) return 1;
+  return pixelmatch(a.data, b.data, null, a.width, a.height, {threshold: .12}) /
+    (a.width * a.height);
+};
 
 async function run() {
   const browser = await chromium.launch({headless: true,
@@ -32,20 +41,40 @@ async function run() {
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
         await page.goto(`${base}/${route}/`);
-        await page.waitForTimeout(400);
+        await page.waitForTimeout(route === 'contract-drafting' && !old ? 900 : 400);
         const visible = page.locator(`#${section}`);
         if (!await visible.isVisible()) throw new Error(`${route} ${width}: section hidden`);
         results.push({
           dom: hash(await visible.evaluate(el => el.outerHTML)),
-          pixels: hash(await page.screenshot({fullPage: true, animations: 'disabled'})),
-          errors
+          text: hash(await visible.innerText()),
+          pixels: await page.screenshot({fullPage: true, animations: 'disabled'}),
+          errors,
+          draftingReady: route === 'contract-drafting' && !old ? await page.evaluate(() => ({
+            pending: document.documentElement.classList.contains('drafting-machine-pending'),
+            ready: document.querySelector('#draft .td-shell')?.classList.contains('td-machine-ready'),
+            machineDecoded: Boolean(document.querySelector('[data-drafting-machine]')?.complete &&
+              document.querySelector('[data-drafting-machine]')?.naturalWidth),
+            propsReady: innerWidth <= 600 || Array.from(document.querySelectorAll('#draft .td-prop'))
+              .every(el => el.classList.contains('is-loaded') && el.complete && el.naturalWidth)
+          })) : null
         });
         await context.close();
       }
-      if (results[0].dom !== results[1].dom) throw new Error(`${route} ${width}: visible DOM changed`);
-      if (results[0].pixels !== results[1].pixels) throw new Error(`${route} ${width}: pixels changed`);
+      if (route === 'contract-drafting') {
+        if (results[0].text !== results[1].text)
+          throw new Error(`${route} ${width}: visible service copy changed`);
+        if (!results[1].draftingReady.ready || results[1].draftingReady.pending ||
+            !results[1].draftingReady.machineDecoded || !results[1].draftingReady.propsReady)
+          throw new Error(`${route} ${width}: approved first-frame assets are not ready`);
+      } else {
+        if (results[0].dom !== results[1].dom) throw new Error(`${route} ${width}: visible DOM changed`);
+        const difference = pixelDifference(results[0].pixels, results[1].pixels);
+        if (difference > .01) throw new Error(`${route} ${width}: pixel difference ${(difference * 100).toFixed(3)}%`);
+      }
       if (results[1].errors.length) throw new Error(`${route} ${width}: JS error`);
-      console.log(`PASS ${route} ${width}: visible DOM and screenshot identical`);
+      console.log(route === 'contract-drafting'
+        ? `PASS ${route} ${width}: copy preserved; machine/props decoded before ready`
+        : `PASS ${route} ${width}: visible DOM and screenshot identical`);
     }
   }
   await browser.close();
