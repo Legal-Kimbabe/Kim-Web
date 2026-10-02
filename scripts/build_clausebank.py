@@ -20,6 +20,12 @@ CODE = re.compile(r'<span class="code">([^<]+)</span>')
 CONTENT = '<div class="content clause-library">'
 FILTERS = '<div class="filters">'
 VERSIONS = {'短版': 'short', '長版': 'long'}
+SEO_TITLE_DISAMBIGUATION_CODES = frozenset({
+    'IA-01', 'IA-02', 'IA-03', 'IA-04',
+    'FM-01', 'FM-02',
+    'MI-02', 'MI-03', 'MI-09', 'MI-10', 'MI-11', 'MI-12',
+    'DM-01', 'DM-02',
+})
 
 
 def versioned_script(page: str) -> str:
@@ -184,6 +190,51 @@ def home_card(existing: str, canonical: str) -> str:
     return head + body
 
 
+def canonicalize_hub_links(page: str) -> str:
+    """Point ClauseBank hub navigation at its canonical root URL."""
+    return page.replace('href="/clausebank/"', 'href="/"')
+
+
+def plain_text(value: str | None) -> str:
+    return html.unescape(re.sub(r'<[^>]+>', '', value or '')).strip()
+
+
+def disambiguated_semantic_title(card: str) -> str:
+    """Build natural unique titles only for the historically duplicated set."""
+    card_code = code(card)
+    zh_title = plain_text(field(card, 'title'))
+    context = plain_text(field(card, 'applicability'))
+    label = '短版' if clause_version(card) == 'short' else '長版'
+    qualifier = f'{context}／{label}' if context else label
+    return f'{zh_title}（{qualifier}）｜中英文合約・契約條款｜金法務在線'
+
+
+def update_semantic_title(head: str, card: str) -> str:
+    """Repair known duplicate SEO titles without rewriting other indexed heads."""
+    if code(card) not in SEO_TITLE_DISAMBIGUATION_CODES:
+        return head
+    title = html.escape(disambiguated_semantic_title(card), quote=True)
+    head = re.sub(r'<title>.*?</title>', f'<title>{title}</title>', head,
+                  count=1, flags=re.S)
+    head = re.sub(r'(<meta property="og:title" content=")[^"]*("/>)',
+                  lambda match: match.group(1) + title + match.group(2),
+                  head, count=1)
+    return head
+
+
+def semantic_body(landing: str, target: str, h1: str, card_code: str) -> str:
+    """Compose a semantic page from the shared shell and one primary clause."""
+    body = landing[landing.index('<body'):]
+    body = body.replace('data-clause-code=""', f'data-clause-code="{card_code}"', 1)
+    body = re.sub(r'<h1 class="seo-site-title">.*?</h1>', h1, body,
+                  count=1, flags=re.S)
+    body = replace_filters(body, '')
+    body = replace_cards(body, [target])
+    body = canonicalize_hub_links(body)
+    # The canonical landing lives one directory above each semantic page.
+    return re.sub(r'((?:src|href)=")assets/', r'\1../assets/', body)
+
+
 def new_semantic_page(landing: str, original: str, url: str) -> str:
     """Create only a *new* URL; existing indexed heads are never regenerated."""
     card_code = code(original)
@@ -194,7 +245,9 @@ def new_semantic_page(landing: str, original: str, url: str) -> str:
     if context:
         description += f'，適用情境：{context}'
     description += '。'
-    title = f'{zh_title}｜{card_code}｜中英文合約條款｜金法務在線'
+    title = (disambiguated_semantic_title(original)
+             if card_code in SEO_TITLE_DISAMBIGUATION_CODES
+             else f'{zh_title}｜{card_code}｜中英文合約條款｜金法務在線')
     canonical = 'https://www.legal-kim.com' + url
     page = landing
     page = re.sub(r'<title>.*?</title>', f'<title>{html.escape(title)}</title>', page, count=1)
@@ -208,28 +261,22 @@ def new_semantic_page(landing: str, original: str, url: str) -> str:
     page = re.sub(r'<h1 class="seo-site-title">.*?</h1>',
                   f'<h1 class="seo-site-title">{html.escape(card_code)} {html.escape(zh_title)}｜{html.escape(en_title)}</h1>',
                   page, count=1)
-    page = page.replace('data-clause-code=""', f'data-clause-code="{card_code}"', 1)
-    page = page.replace('href="assets/clausebank.css"', 'href="../assets/clausebank.css"')
-    page = page.replace('src="assets/images/clausebank-hero.webp"', 'src="../assets/images/clausebank-hero.webp"')
-    page = page.replace('src="assets/clausebank.js"', 'src="../assets/clausebank.js"')
-    return page
+    h1 = re.search(r'<h1 class="seo-site-title">.*?</h1>', page, re.S)
+    if not h1:
+        raise ValueError(f'{card_code}: generated semantic page is missing its H1')
+    head_end = page.index('</head>') + len('</head>')
+    return page[:head_end] + '\n' + semantic_body(page, original, h1.group(0), card_code)
 
 
 def refresh_semantic_page(landing: str, existing: str, original: str) -> str:
     """Use the canonical landing shell while preserving an indexed page's SEO head/H1."""
     card_code = code(original)
     head_end = existing.index('</head>') + len('</head>')
-    head = existing[:head_end]
+    head = update_semantic_title(existing[:head_end], original)
     existing_h1 = re.search(r'<h1 class="seo-site-title">.*?</h1>', existing, re.S)
     if not existing_h1:
         raise ValueError(f'{card_code}: semantic page is missing its indexed H1')
-    body = landing[landing.index('<body'):]
-    body = body.replace('data-clause-code=""', f'data-clause-code="{card_code}"', 1)
-    body = re.sub(r'<h1 class="seo-site-title">.*?</h1>', existing_h1.group(0), body,
-                  count=1, flags=re.S)
-    # The canonical landing lives one directory above each semantic page.
-    body = re.sub(r'((?:src|href)=")assets/', r'\1../assets/', body)
-    return head + '\n' + body
+    return head + '\n' + semantic_body(landing, original, existing_h1.group(0), card_code)
 
 
 def build() -> None:
@@ -240,14 +287,16 @@ def build() -> None:
 # Root and /clausebank/ intentionally share one canonical ClauseBank data source.
     landing_path = ROOT / 'clausebank/index.html'
     landing = landing_path.read_text(encoding='utf-8')
-    landing_out = versioned_script(replace_cards(replace_filters(landing, filters), compiled))
+    landing_out = canonicalize_hub_links(
+        versioned_script(replace_cards(replace_filters(landing, filters), compiled)))
     validate_landing_initial_state(landing_out)
     if landing_out != landing:
         landing_path.write_text(landing_out, encoding='utf-8')
 
     home_path = ROOT / 'index.html'
     home = home_path.read_text(encoding='utf-8')
-    home_out = versioned_script(replace_cards(replace_filters(home, filters), compiled))
+    home_out = canonicalize_hub_links(
+        versioned_script(replace_cards(replace_filters(home, filters), compiled)))
     validate_landing_initial_state(home_out)
     if home_out != home:
         home_path.write_text(home_out, encoding='utf-8')

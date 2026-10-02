@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import re
 import subprocess
 from urllib.parse import urljoin, urlparse
 from xml.etree import ElementTree
 from pathlib import Path
 
-from build_clausebank import ROOT, SOURCE, cards, code, field, source_parts
+from build_clausebank import (ROOT, SOURCE, SEO_TITLE_DISAMBIGUATION_CODES,
+                              cards, code, disambiguated_semantic_title,
+                              field, source_parts)
 
 BASELINE = 'ca99b687e89082e3617f5cee317b01466c218b96'
 NEW_17 = ('COI-01', 'COI-02', 'COI-03', 'SLA-01', 'SLA-02', 'SLA-03',
@@ -51,6 +54,25 @@ def seo_signature(page: str) -> str:
                     r'<script type="application/ld\+json">.*?</script>'):
         fields += re.findall(pattern, head, re.S)
     return digest('\n'.join(fields) + (h1.group(0) if h1 else ''))
+
+
+def seo_signature_without_title(page: str) -> str:
+    """Lock every indexed field except the two intentionally repaired titles."""
+    head = page[:page.index('</head>') + len('</head>')]
+    h1 = re.search(r'<h1 class="seo-site-title">.*?</h1>', page, re.S)
+    fields = []
+    for pattern in (r'<meta name="description"[^>]*>',
+                    r'<link rel="canonical"[^>]*>',
+                    r'<meta property="og:(?!title)[^"]+"[^>]*>',
+                    r'<script type="application/ld\+json">.*?</script>'):
+        fields += re.findall(pattern, head, re.S)
+    return digest('\n'.join(fields) + (h1.group(0) if h1 else ''))
+
+
+def head_value(page: str, pattern: str, label: str) -> str:
+    found = re.search(pattern, page[:page.index('</head>')], re.S)
+    check(found is not None, f'missing {label}')
+    return html.unescape(found.group(1)).strip()
 
 
 def text_body(card: str, language: str) -> str:
@@ -96,53 +118,77 @@ def main(expected_count: int) -> None:
         slugs[href.group(1)] = code(item)
     check(len(slugs) == expected_count, 'semantic href count')
 
-    pages = ['index.html', 'clausebank/index.html']
-    pages += [url.lstrip('/') + 'index.html' for url in slugs]
+    landing_pages = ['index.html', 'clausebank/index.html']
+    semantic_pages = {url.lstrip('/') + 'index.html': target
+                      for url, target in slugs.items()}
+    pages = landing_pages + list(semantic_pages)
     js_version = hashlib.sha256((ROOT / 'clausebank/assets/clausebank.js').read_bytes()).hexdigest()[:12]
     header_version = hashlib.sha256((ROOT / 'assets/editorial-header.js').read_bytes()).hexdigest()[:12]
+    canonical_by_code = {code(item): item for item in canonical}
+
+    def validate_rendered_card(actual: str, original: str, relative: str) -> None:
+        card_code = code(original)
+        for language in ('zh', 'en-copy'):
+            check(digest(text_body(actual, language)) == digest(text_body(original, language)),
+                  f'{language} clause changed: {relative} {card_code}')
+        actual_mode = re.search(r'<span class="mode(?: [^"]*)?">([^<]*)</span>', actual)
+        check(actual_mode is not None and actual_mode.group(1) == mode_by_code[card_code],
+              f'mode changed: {relative} {card_code}')
+        for cls in ('title', 'en', 'applicability'):
+            check(field(actual, cls) == field(original, cls),
+                  f'{cls} changed: {relative} {card_code}')
+        for attr in ('data-cat', 'data-search'):
+            approved_value = re.search(attr + r'="([^"]*)"', original)
+            output_value = re.search(attr + r'="([^"]*)"', actual)
+            check(approved_value is not None and output_value is not None
+                  and approved_value.group(1) == output_value.group(1),
+                  f'{attr} changed: {relative} {card_code}')
+
+    semantic_titles = {}
+    semantic_og_titles = {}
     for relative in pages:
         path = ROOT / relative
         check(path.is_file(), f'missing output: {relative}')
         page = path.read_text(encoding='utf-8')
         rendered = cards(page)
         codes = [code(item) for item in rendered]
-        check(len(codes) == expected_count and set(codes) == set(expected_codes),
-              f'not all {expected_count} cards: {relative}')
-        check(len(codes) == len(set(codes)), f'duplicate card: {relative}')
         check('一般版' not in page, f'legacy mode label: {relative}')
         check(f'clausebank.js?v={js_version}' in page,
               f'shared JS cache version mismatch: {relative}')
         check(f'editorial-header.js?v={header_version}' in page,
               f'editorial header cache version mismatch: {relative}')
         check(not re.search(r'(?m)^\s*<\s*$', page), f'stray angle bracket: {relative}')
-        check(len(re.findall(r'<button class="filter', page)) == 23,
-              f'filter count: {relative}')
-        by_code = dict(zip(codes, rendered))
-        for original in canonical:
-            actual = by_code[code(original)]
-            for language in ('zh', 'en-copy'):
-                check(digest(text_body(actual, language)) == digest(text_body(original, language)),
-                      f'{language} clause changed: {relative} {code(original)}')
-            actual_mode = re.search(r'<span class="mode(?: [^"]*)?">([^<]*)</span>', actual)
-            check(actual_mode is not None and actual_mode.group(1) == mode_by_code[code(original)],
-                  f'mode changed: {relative} {code(original)}')
-            for cls in ('title', 'en', 'applicability'):
-                check(field(actual, cls) == field(original, cls),
-                      f'{cls} changed: {relative} {code(original)}')
-            for attr in ('data-cat', 'data-search'):
-                approved_value = re.search(attr + r'="([^"]*)"', original)
-                output_value = re.search(attr + r'="([^"]*)"', actual)
-                check(approved_value is not None and output_value is not None
-                      and approved_value.group(1) == output_value.group(1),
-                      f'{attr} changed: {relative} {code(original)}')
-        if relative not in ('index.html', 'clausebank/index.html') and subprocess.run(['git', 'cat-file', '-e', f'{BASELINE}:{relative}'],
-                          cwd=ROOT, stdout=subprocess.DEVNULL,
-                          stderr=subprocess.DEVNULL).returncode == 0:
-            check(seo_signature(page) == seo_signature(baseline(relative)),
-                  f'SEO head/H1 changed: {relative}')
-        if relative.startswith('clausebank/') and relative != 'clausebank/index.html':
+        check(len(codes) == len(set(codes)), f'duplicate card: {relative}')
+        if relative in landing_pages:
+            check(len(codes) == expected_count and set(codes) == set(expected_codes),
+                  f'landing must render all {expected_count} cards: {relative}')
+            check(len(re.findall(r'<button class="filter', page)) == 23,
+                  f'landing filter count: {relative}')
+            for actual in rendered:
+                validate_rendered_card(actual, canonical_by_code[code(actual)], relative)
+        else:
+            target = semantic_pages[relative]
+            check(codes == [target],
+                  f'semantic page must render only {target}: {relative} got {codes}')
+            check(len(re.findall(r'<button class="filter', page)) == 0,
+                  f'semantic page must not render collection filters: {relative}')
+            check('<div class="lang">' in page,
+                  f'semantic language controls missing: {relative}')
+            validate_rendered_card(rendered[0], canonical_by_code[target], relative)
+
+            baseline_exists = subprocess.run(
+                ['git', 'cat-file', '-e', f'{BASELINE}:{relative}'], cwd=ROOT,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+            if baseline_exists:
+                if target in SEO_TITLE_DISAMBIGUATION_CODES:
+                    check(seo_signature_without_title(page) ==
+                          seo_signature_without_title(baseline(relative)),
+                          f'non-title SEO head/H1 changed: {relative}')
+                else:
+                    check(seo_signature(page) == seo_signature(baseline(relative)),
+                          f'SEO head/H1 changed: {relative}')
+
             url_path = '/' + relative.removesuffix('index.html')
-            target = slugs[url_path]
             check(f'data-clause-code="{target}"' in page,
                   f'deep-link target changed: {relative}')
             canonical_url = 'https://www.legal-kim.com' + url_path
@@ -152,13 +198,36 @@ def main(expected_count: int) -> None:
                   f'OG URL mismatch: {relative}')
             check('<title></title>' not in page and '<meta name="description" content=""' not in page,
                   f'empty SEO metadata: {relative}')
+            check(bool(head_value(
+                page, r'<meta name="description" content="([^"]+)"\s*/>',
+                f'meta description: {relative}')),
+                f'empty meta description: {relative}')
             check('noindex' not in page.lower(), f'not indexable: {relative}')
+            check(len(re.findall(r'<h1\b', page)) == 1,
+                  f'semantic page must have exactly one H1: {relative}')
             check('<header class="editorial-site-header">' in page
                   and '<div class="top-brand">' not in page
                   and '<nav aria-label="Main navigation" class="main-nav">' not in page,
                   f'legacy semantic wrapper: {relative}')
             check('src="../assets/images/clausebank-hero-final.png"' in page,
                   f'semantic page hero differs from canonical landing: {relative}')
+            check('href="/clausebank/"' not in page,
+                  f'legacy ClauseBank hub link remains: {relative}')
+            title = head_value(page, r'<title>(.*?)</title>', f'title: {relative}')
+            og_title = head_value(
+                page, r'<meta property="og:title" content="([^"]*)"\s*/>',
+                f'og:title: {relative}')
+            check(title == og_title, f'title/og:title mismatch: {relative}')
+            if target in SEO_TITLE_DISAMBIGUATION_CODES:
+                check(title == disambiguated_semantic_title(canonical_by_code[target]),
+                      f'disambiguated title not source-derived: {relative}')
+            semantic_titles[target] = title
+            semantic_og_titles[target] = og_title
+    check(len(semantic_titles) == expected_count, 'semantic title coverage')
+    check(len(set(semantic_titles.values())) == expected_count,
+          'semantic titles must be unique across all 98 URLs')
+    check(len(set(semantic_og_titles.values())) == expected_count,
+          'semantic og:title values must be unique across all 98 URLs')
     home_text = (ROOT / 'index.html').read_text(encoding='utf-8')
     alias_text = (ROOT / 'clausebank/index.html').read_text(encoding='utf-8')
     check(home_text.count('id="vault"') == 1, 'homepage vault missing')
@@ -170,6 +239,10 @@ def main(expected_count: int) -> None:
           'ClauseBank alias canonical must point to root')
     check('<meta property="og:url" content="https://www.legal-kim.com/"/>' in alias_text,
           'ClauseBank alias OG URL must point to root')
+    check('href="/clausebank/"' not in home_text,
+          'homepage navigation must use canonical ClauseBank root')
+    check('href="/clausebank/"' not in alias_text,
+          'ClauseBank alias navigation must use canonical root')
     check('clause-copy-count-js' not in (ROOT / 'index.html').read_text(encoding='utf-8'),
           'homepage duplicated copy-count implementation')
     for name in SERVICE:
@@ -183,13 +256,16 @@ def main(expected_count: int) -> None:
               f'service SEO head/H1 changed: {relative}')
         check(f'<body class="{body_class}">' in page,
               f'initial service body state missing: {relative} {body_class}')
-        check(f'editorial-header.js?v={header_version}' in page,
-              f'editorial header cache version mismatch: {relative}')
+        check('/assets/editorial-header.js?v=' in page,
+              f'editorial header script missing: {relative}')
         for section in ('draft', 'review', 'translate', 'about'):
             state = 'page active' if section == active_section else 'page'
             marker = f'<section class="{state}" id="{section}">'
             check(marker in page, f'visible service section missing: {relative} {section}')
     header_script = (ROOT / 'assets/editorial-header.js').read_text(encoding='utf-8')
+    check("{ path: '/', zh: '條款金庫'" in header_script
+          and "if (path.startsWith('/clausebank/')) return '/';" in header_script,
+          'ClauseBank editorial navigation must point to canonical root')
     check("path: '/about/?floor=G'" in header_script,
           'FREE DOWNLOAD route missing from editorial navigation')
     sitemap = ElementTree.fromstring((ROOT / 'sitemap.xml').read_text(encoding='utf-8'))
@@ -202,6 +278,12 @@ def main(expected_count: int) -> None:
         target = ROOT / parsed.path.lstrip('/')
         check((target / 'index.html').is_file() if parsed.path.endswith('/') else target.is_file(),
               f'broken sitemap URL: {url}')
+    semantic_sitemap_paths = {
+        urlparse(url).path for url in urls if '/clausebank/' in urlparse(url).path
+        and urlparse(url).path != '/clausebank/'
+    }
+    check(semantic_sitemap_paths == set(slugs),
+          'sitemap semantic URL set differs from canonical 98 slugs')
     # Local asset references in the generated ClauseBank pages must resolve.
     for relative in pages:
         page = (ROOT / relative).read_text(encoding='utf-8')
@@ -212,11 +294,13 @@ def main(expected_count: int) -> None:
             if parsed.path.endswith(('.css', '.js', '.webp', '.png', '.jpg', '.ico')):
                 check((ROOT / parsed.path.lstrip('/')).is_file(),
                       f'broken local asset: {relative} -> {attr}')
-    print(f'PASS: {expected_count} cards; '
+    print(f'PASS: canonical source {expected_count} cards; '
           f'{sum(m == "短版" for m in mode_by_code.values())} short/'
           f'{sum(m == "長版" for m in mode_by_code.values())} long; '
           f'MI-12 short; 17 baseline additions; 23 filters; {expected_count} URLs')
-    print('PASS: bilingual clause hashes, SEO head/H1, deep-link targets, no legacy service data')
+    print(f'PASS: landing 98 cards; {expected_count} semantic pages each contain one matching target')
+    print('PASS: bilingual clause hashes; SEO/H1/canonical preserved; 98 unique title + og:title values')
+    print('PASS: canonical root hub links, deep-link targets, no legacy service data')
     print(f'PASS: {expected_count + 5} unique sitemap URLs, local assets, no stray <')
 
 

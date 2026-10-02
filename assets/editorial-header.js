@@ -1,6 +1,6 @@
 (function () {
   const items = [
-    { path: '/clausebank/', zh: '條款金庫', en: 'ClauseBank', mobileEn: 'CLAUSE BANK' },
+    { path: '/', zh: '條款金庫', en: 'ClauseBank', mobileEn: 'CLAUSE BANK' },
     { path: '/about/?floor=G', zh: '免費下載', en: 'Free Download', mobileEn: 'FREE DOWNLOAD' },
     { path: '/contract-drafting/', zh: '契約撰寫', en: 'Contract Drafting' },
     { path: '/contract-review/', zh: '契約健檢', en: 'Contract Checkup' },
@@ -10,7 +10,7 @@
 
   function currentPath() {
     const path = window.location.pathname.replace(/\/index\.html$/, '/');
-    if (path.startsWith('/clausebank/')) return '/clausebank/';
+    if (path.startsWith('/clausebank/')) return '/';
     if (path === '/about/' && new URLSearchParams(window.location.search).get('floor') === 'G') return '/about/?floor=G';
     return items.some(item => item.path === path) ? path : '';
   }
@@ -128,6 +128,9 @@
   }
 
   function init() {
+    document.querySelectorAll('a[href="/clausebank/"]').forEach(function (link) {
+      link.setAttribute('href', '/');
+    });
     let header = document.querySelector('.editorial-site-header');
     let toggle = document.querySelector('.editorial-service-toggle');
     let overlay = document.getElementById('editorialServiceOverlay');
