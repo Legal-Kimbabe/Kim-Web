@@ -92,15 +92,26 @@ async function runSemanticCase(browser, route, targetCode, width, height) {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(base + route, {waitUntil: 'load'});
-  await page.waitForTimeout(250);
-  assert(await page.locator('#vault .card').count() === 1,
-    `${route} ${width}: semantic page must have one card`);
-  assert((await page.locator('#vault .card .code').textContent()).trim() === targetCode,
-    `${route} ${width}: wrong semantic target`);
-  assert(await page.locator('#vault .card').evaluate(el => el.classList.contains('open')),
+  await page.waitForTimeout(500);
+  assert(await page.locator('#vault .card').count() === 98,
+    `${route} ${width}: semantic card count`);
+  assert(await page.locator('#vault .copy-count').count() === 98,
+    `${route} ${width}: semantic copy-count hooks`);
+  assert(await page.locator('[data-filter="payment"]').count() === 1,
+    `${route} ${width}: semantic filters missing`);
+  const target = page.locator('#vault .card').filter({
+    has: page.locator(`.code:text-is("${targetCode}")`),
+  });
+  assert(await target.count() === 1, `${route} ${width}: wrong semantic target`);
+  assert(await target.evaluate(el => el.classList.contains('open')),
     `${route} ${width}: direct target must open`);
-  assert(await page.locator('#vault .filter').count() === 0,
-    `${route} ${width}: semantic collection filters remain`);
+  await page.waitForFunction(code => {
+    const card = [...document.querySelectorAll('#vault .card')]
+      .find(el => el.querySelector('.code')?.textContent.trim() === code);
+    if (!card) return false;
+    const box = card.getBoundingClientRect();
+    return box.top < innerHeight && box.bottom > 0;
+  }, targetCode, {timeout: 4000});
   assert(await page.locator('h1').count() === 1,
     `${route} ${width}: semantic H1 count`);
   assert(await page.locator('.editorial-desktop-nav a[href="/"]').count() >= 1,
@@ -113,11 +124,28 @@ async function runSemanticCase(browser, route, targetCode, width, height) {
   assert(await page.evaluate(() => document.body.classList.contains('en-mode')),
     `${route} ${width}: semantic English toggle`);
   await lang.getByText('中文', {exact: true}).click();
-  await page.locator('#vault .card .copy').click();
+  await target.locator('.copy').click();
   await page.waitForTimeout(150);
   assert(getPostCount() > 0, `${route} ${width}: semantic copy increment`);
+
+  await page.locator('[data-filter="warranty"]').click();
+  assert(await page.locator('#vault .card:visible').count() === 3,
+    `${route} ${width}: semantic warranty filter count`);
+  const warranty = page.locator('#vault .card:visible').first();
+  for (let step = 0; step < 3; step++) {
+    const wasOpen = await warranty.evaluate(el => el.classList.contains('open'));
+    await warranty.locator('.cardhead').click();
+    assert(await warranty.evaluate(el => el.classList.contains('open')) !== wasOpen,
+      `${route} ${width}: semantic filter card did not toggle step ${step}`);
+    assert(await page.locator('[data-filter="warranty"]').evaluate(el => el.classList.contains('active')),
+      `${route} ${width}: semantic category lost step ${step}`);
+    assert(await page.locator('#vault .card:visible').count() === 3,
+      `${route} ${width}: semantic filter reset step ${step}`);
+  }
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+    `${route} ${width}: semantic overflow after interaction`);
   await context.close();
-  console.log(`PASS ${width}x${height} ${route}: one ${targetCode} card, direct-access UX`);
+  console.log(`PASS ${width}x${height} ${route}: 98 cards, ${targetCode} open/focused, full UX`);
 }
 
 async function runTitleClickMatrix(browser, width, height) {

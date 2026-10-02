@@ -168,13 +168,15 @@ def main(expected_count: int) -> None:
                 validate_rendered_card(actual, canonical_by_code[code(actual)], relative)
         else:
             target = semantic_pages[relative]
-            check(codes == [target],
-                  f'semantic page must render only {target}: {relative} got {codes}')
-            check(len(re.findall(r'<button class="filter', page)) == 0,
-                  f'semantic page must not render collection filters: {relative}')
+            check(len(codes) == expected_count and set(codes) == set(expected_codes),
+                  f'semantic page must preserve all {expected_count} cards: {relative}')
+            check(len(re.findall(r'<button class="filter', page)) == 23,
+                  f'semantic page filter count: {relative}')
             check('<div class="lang">' in page,
                   f'semantic language controls missing: {relative}')
-            validate_rendered_card(rendered[0], canonical_by_code[target], relative)
+            by_code = {code(actual): actual for actual in rendered}
+            for card_code, original in canonical_by_code.items():
+                validate_rendered_card(by_code[card_code], original, relative)
 
             baseline_exists = subprocess.run(
                 ['git', 'cat-file', '-e', f'{BASELINE}:{relative}'], cwd=ROOT,
@@ -298,7 +300,7 @@ def main(expected_count: int) -> None:
           f'{sum(m == "短版" for m in mode_by_code.values())} short/'
           f'{sum(m == "長版" for m in mode_by_code.values())} long; '
           f'MI-12 short; 17 baseline additions; 23 filters; {expected_count} URLs')
-    print(f'PASS: landing 98 cards; {expected_count} semantic pages each contain one matching target')
+    print(f'PASS: landing and {expected_count} semantic pages preserve all {expected_count} cards and filters')
     print('PASS: bilingual clause hashes; SEO/H1/canonical preserved; 98 unique title + og:title values')
     print('PASS: canonical root hub links, deep-link targets, no legacy service data')
     print(f'PASS: {expected_count + 5} unique sitemap URLs, local assets, no stray <')

@@ -222,14 +222,12 @@ def update_semantic_title(head: str, card: str) -> str:
     return head
 
 
-def semantic_body(landing: str, target: str, h1: str, card_code: str) -> str:
-    """Compose a semantic page from the shared shell and one primary clause."""
+def semantic_landing_body(landing: str, h1: str, card_code: str) -> str:
+    """Compose the approved full ClauseBank deep-link body for one target."""
     body = landing[landing.index('<body'):]
     body = body.replace('data-clause-code=""', f'data-clause-code="{card_code}"', 1)
     body = re.sub(r'<h1 class="seo-site-title">.*?</h1>', h1, body,
                   count=1, flags=re.S)
-    body = replace_filters(body, '')
-    body = replace_cards(body, [target])
     body = canonicalize_hub_links(body)
     # The canonical landing lives one directory above each semantic page.
     return re.sub(r'((?:src|href)=")assets/', r'\1../assets/', body)
@@ -265,7 +263,7 @@ def new_semantic_page(landing: str, original: str, url: str) -> str:
     if not h1:
         raise ValueError(f'{card_code}: generated semantic page is missing its H1')
     head_end = page.index('</head>') + len('</head>')
-    return page[:head_end] + '\n' + semantic_body(page, original, h1.group(0), card_code)
+    return page[:head_end] + '\n' + semantic_landing_body(page, h1.group(0), card_code)
 
 
 def refresh_semantic_page(landing: str, existing: str, original: str) -> str:
@@ -276,7 +274,7 @@ def refresh_semantic_page(landing: str, existing: str, original: str) -> str:
     existing_h1 = re.search(r'<h1 class="seo-site-title">.*?</h1>', existing, re.S)
     if not existing_h1:
         raise ValueError(f'{card_code}: semantic page is missing its indexed H1')
-    return head + '\n' + semantic_body(landing, original, existing_h1.group(0), card_code)
+    return head + '\n' + semantic_landing_body(landing, existing_h1.group(0), card_code)
 
 
 def build() -> None:
