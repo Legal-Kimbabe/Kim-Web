@@ -11,7 +11,8 @@ from urllib.parse import urljoin, urlparse
 from xml.etree import ElementTree
 from pathlib import Path
 
-from build_clausebank import ROOT, SOURCE, cards, code, field, source_parts
+from build_clausebank import (ROOT, SOURCE, cards, code,
+                              disambiguated_semantic_title, field, source_parts)
 
 BASELINE = 'ca99b687e89082e3617f5cee317b01466c218b96'
 NEW_17 = ('COI-01', 'COI-02', 'COI-03', 'SLA-01', 'SLA-02', 'SLA-03',
@@ -45,9 +46,12 @@ def check(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
-def seo_signature(page: str) -> str:
+def seo_signature(page: str, include_title: bool = True) -> str:
     # Lock indexed fields, not unrelated presentation CSS within <head>.
     head = page[:page.index('</head>') + len('</head>')]
+    if not include_title:
+        head = re.sub(r'<title>.*?</title>', '', head, count=1, flags=re.S)
+        head = re.sub(r'<meta property="og:title"[^>]*>', '', head, count=1)
     h1 = re.search(r'<h1 class="seo-site-title">.*?</h1>', page, re.S)
     fields = []
     for pattern in (r'<title>.*?</title>',
@@ -124,9 +128,21 @@ def main(expected_count: int) -> None:
         check(href.group(1) not in slugs, 'duplicate semantic href')
         slugs[href.group(1)] = code(item)
     check(len(slugs) == expected_count, 'semantic href count')
+    canonical_by_code = {code(item): item for item in canonical}
 
     pages = ['index.html', 'clausebank/index.html']
     pages += [url.lstrip('/') + 'index.html' for url in slugs]
+    baseline_titles = []
+    for relative in pages[2:]:
+        if subprocess.run(['git', 'cat-file', '-e', f'{BASELINE}:{relative}'],
+                          cwd=ROOT, stdout=subprocess.DEVNULL,
+                          stderr=subprocess.DEVNULL).returncode == 0:
+            archived = baseline(relative)
+            title = re.search(r'<title>(.*?)</title>', archived, re.S)
+            if title:
+                baseline_titles.append(title.group(1))
+    duplicate_baseline_titles = {title for title in baseline_titles
+                                 if baseline_titles.count(title) > 1}
     js_version = hashlib.sha256((ROOT / 'clausebank/assets/clausebank.js').read_bytes()).hexdigest()[:12]
     header_version = hashlib.sha256((ROOT / 'assets/editorial-header.js').read_bytes()).hexdigest()[:12]
     for relative in pages:
@@ -167,8 +183,23 @@ def main(expected_count: int) -> None:
         if relative not in ('index.html', 'clausebank/index.html') and subprocess.run(['git', 'cat-file', '-e', f'{BASELINE}:{relative}'],
                           cwd=ROOT, stdout=subprocess.DEVNULL,
                           stderr=subprocess.DEVNULL).returncode == 0:
-            check(seo_signature(page) == seo_signature(baseline(relative)),
-                  f'SEO head/H1 changed: {relative}')
+            archived = baseline(relative)
+            archived_title = re.search(r'<title>(.*?)</title>', archived, re.S).group(1)
+            if archived_title in duplicate_baseline_titles:
+                check(seo_signature(page, include_title=False)
+                      == seo_signature(archived, include_title=False),
+                      f'non-title SEO head/H1 changed: {relative}')
+                url_path = '/' + relative.removesuffix('index.html')
+                target = slugs[url_path]
+                expected_title = disambiguated_semantic_title(
+                    archived, canonical_by_code[target])
+                check(f'<title>{expected_title}</title>' in page,
+                      f'duplicate semantic title not repaired: {relative}')
+                check(f'<meta property="og:title" content="{expected_title}"/>' in page,
+                      f'duplicate OG title not repaired: {relative}')
+            else:
+                check(seo_signature(page) == seo_signature(archived),
+                      f'SEO head/H1 changed: {relative}')
         if relative.startswith('clausebank/') and relative != 'clausebank/index.html':
             url_path = '/' + relative.removesuffix('index.html')
             target = slugs[url_path]
@@ -201,6 +232,9 @@ def main(expected_count: int) -> None:
           'ClauseBank alias OG URL must point to root')
     check('clause-copy-count-js' not in (ROOT / 'index.html').read_text(encoding='utf-8'),
           'homepage duplicated copy-count implementation')
+    for path in ROOT.rglob('*.html'):
+        check('href="/clausebank/"' not in path.read_text(encoding='utf-8'),
+              f'legacy ClauseBank hub link: {path.relative_to(ROOT)}')
     for name in SERVICE:
         relative = f'{name}/index.html'
         page = (ROOT / relative).read_text(encoding='utf-8')

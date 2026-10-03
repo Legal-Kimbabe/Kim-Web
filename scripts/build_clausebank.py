@@ -34,6 +34,9 @@ def versioned_script(page: str) -> str:
         shared_header = ('<link rel="stylesheet" href="/assets/editorial-header.css?v=20260923a"/>\n'
                          f'<script src="/assets/editorial-header.js?v={header_version}" defer></script>\n')
         page = page.replace('</head>', shared_header + '</head>', 1)
+    # The canonical ClauseBank hub is the site root. Keep generated navigation
+    # from rediscovering the legacy /clausebank/ alias.
+    page = page.replace('href="/clausebank/"', 'href="/"')
     return page
 
 
@@ -215,11 +218,36 @@ def new_semantic_page(landing: str, original: str, url: str) -> str:
     return page
 
 
-def refresh_semantic_page(landing: str, existing: str, original: str) -> str:
+def disambiguated_semantic_title(existing: str, original: str) -> str:
+    """Differentiate an existing duplicate title using canonical metadata."""
+    current = re.search(r'<title>(.*?)</title>', existing, re.S)
+    if not current:
+        raise ValueError(f'{code(original)}: semantic page is missing its title')
+    prefix, separator, suffix = html.unescape(current.group(1)).partition('｜')
+    if not separator:
+        raise ValueError(f'{code(original)}: semantic page title has no suffix')
+    label = '短版' if clause_version(original) == 'short' else '長版'
+    context = html.unescape(field(original, 'applicability') or '').split('／', 1)[0].strip()
+    qualifiers = [code(original), label]
+    if context:
+        qualifiers.append(context)
+    return f'{prefix}（{"・".join(qualifiers)}）｜{suffix}'
+
+
+def refresh_semantic_page(landing: str, existing: str, original: str,
+                          rewrite_duplicate_title: bool = False) -> str:
     """Use the canonical landing shell while preserving an indexed page's SEO head/H1."""
     card_code = code(original)
     head_end = existing.index('</head>') + len('</head>')
     head = existing[:head_end]
+    if rewrite_duplicate_title:
+        title = disambiguated_semantic_title(existing, original)
+        escaped = html.escape(title)
+        head = re.sub(r'<title>.*?</title>', f'<title>{escaped}</title>', head,
+                      count=1, flags=re.S)
+        head = re.sub(r'(<meta property="og:title" content=")[^"]*("/>)',
+                      lambda match: match.group(1) + html.escape(title, quote=True) + match.group(2),
+                      head, count=1)
     existing_h1 = re.search(r'<h1 class="seo-site-title">.*?</h1>', existing, re.S)
     if not existing_h1:
         raise ValueError(f'{card_code}: semantic page is missing its indexed H1')
@@ -256,6 +284,17 @@ def build() -> None:
                       for item in compiled}
     if len(expected_paths) != len(originals):
         raise ValueError("missing or duplicate semantic slug")
+    existing_titles = []
+    for url in expected_paths:
+        path = ROOT / url.lstrip('/') / 'index.html'
+        if path.exists():
+            page = path.read_text(encoding='utf-8')
+            title = re.search(r'<title>(.*?)</title>', page, re.S)
+            if title:
+                existing_titles.append(title.group(1))
+    duplicate_titles = {title for title in existing_titles
+                        if existing_titles.count(title) > 1}
+
     new_urls = []
     for url, _ in expected_paths.items():
         path = ROOT / url.lstrip('/') / 'index.html'
@@ -265,7 +304,10 @@ def build() -> None:
             new_urls.append(url)
             continue
         page = path.read_text(encoding='utf-8')
-        out = versioned_script(refresh_semantic_page(landing_out, page, expected_paths[url]))
+        current_title = re.search(r'<title>(.*?)</title>', page, re.S)
+        out = versioned_script(refresh_semantic_page(
+            landing_out, page, expected_paths[url],
+            bool(current_title and current_title.group(1) in duplicate_titles)))
         if out != page:
             path.write_text(out, encoding='utf-8')
     if new_urls:
