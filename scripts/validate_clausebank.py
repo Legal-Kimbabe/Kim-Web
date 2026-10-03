@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import re
 import subprocess
 from urllib.parse import urljoin, urlparse
@@ -22,6 +23,11 @@ SERVICE_STATE = {
     'contract-drafting': ('draft', 'draft-page-active'),
     'contract-review': ('review', 'review-page-active'),
     'legal-translation': ('translate', 'translate-page-active'),
+}
+ABOUT_SEO = {
+    'title': '關於我們｜律師團隊與免費契約範本｜金法務在線',
+    'description': '認識金法務在線的律師與法律實務團隊，並免費下載買賣契約書、保密協議書及借貸契約書 Word 範本。',
+    'canonical': 'https://www.legal-kim.com/about/',
 }
 
 
@@ -60,6 +66,29 @@ def text_body(card: str, language: str) -> str:
         found = re.search(r'<div class="clause '+language+r'">(.*?)</div>', card, re.S)
     check(found is not None, f'missing {language} clause: {code(card)}')
     return found.group(1)
+
+
+def validate_about_seo(page: str) -> None:
+    title = ABOUT_SEO['title']
+    description = ABOUT_SEO['description']
+    canonical = ABOUT_SEO['canonical']
+    check(f'<title>{title}</title>' in page, 'About title changed')
+    check(f'<meta name="description" content="{description}"/>' in page,
+          'About description changed')
+    check(f'<link rel="canonical" href="{canonical}"/>' in page,
+          'About canonical changed')
+    check(f'<meta property="og:title" content="{title}"/>' in page,
+          'About OG title changed')
+    check(f'<meta property="og:description" content="{description}"/>' in page,
+          'About OG description changed')
+    check(f'<meta property="og:url" content="{canonical}"/>' in page,
+          'About OG URL changed')
+    blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', page, re.S)
+    check(len(blocks) == 2, 'About JSON-LD block count')
+    for block in blocks:
+        json.loads(block)
+    check('https://www.legal-kim.com/about/#free-download' in page,
+          'Free Download structured data missing')
 
 
 def main(expected_count: int) -> None:
@@ -179,8 +208,11 @@ def main(expected_count: int) -> None:
         check(not cards(page) and '一般版' not in page, f'legacy service cards: {relative}')
         check(not re.search(r'#vault\s+\.|\.clause-library\b|function (?:filterCards|copyClause|setLanguage)\b', page),
               f'legacy service styles/scripts: {relative}')
-        check(seo_signature(page) == seo_signature(baseline(relative)),
-              f'service SEO head/H1 changed: {relative}')
+        if name == 'about':
+            validate_about_seo(page)
+        else:
+            check(seo_signature(page) == seo_signature(baseline(relative)),
+                  f'service SEO head/H1 changed: {relative}')
         check(f'<body class="{body_class}">' in page,
               f'initial service body state missing: {relative} {body_class}')
         check(f'editorial-header.js?v={header_version}' in page,

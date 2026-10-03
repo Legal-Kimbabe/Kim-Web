@@ -13,7 +13,7 @@
   --lkl-img-car: url(/assets/about-lift/lk-elevator-d2.webp?v=d2);
   --lkl-img-rf: url(/assets/about-lift/lk-rf-cat-normal.webp?v=m1);
   --lkl-img-p2: url(/assets/about-lift/lk-p2.webp);
-  --lkl-img-p3: url(/assets/about-lift/lk-p3-far.webp);
+  --lkl-img-p3: url(/assets/about-lift/lk-p3-fullbody.png?v=p3-fullbody-3);
   --lkl-img-rf-belly: url(/assets/about-lift/lk-rf-cat-belly.webp?v=m1);
   --lkl-img-rf-yawn: url(/assets/about-lift/lk-rf-cat-yawn.webp?v=m1);
 
@@ -161,6 +161,7 @@
 .lkl-scene[data-floor="RF"] .lkl-bg { background-image: var(--lkl-img-rf); background-size: cover; }
 .lkl-scene[data-floor="P2"] .lkl-bg { background-image: var(--lkl-img-p2); }
 .lkl-scene[data-floor="P3"] .lkl-bg { background-image: var(--lkl-img-p3); }
+.lkl-scene[data-floor="P3"] .lkl-cam { width: max(100%, calc(100cqh * 1672 / 941)); aspect-ratio: 1672 / 941; }
 /* G：P1－P5 定稿 reference 完整顯示（1366×768，不裁切）；同一樓層內淡入切換 */
 .lkl-scene[data-floor="G"] .lkl-cam { width: max(100%, calc(100cqh * 1366 / 768)); aspect-ratio: 1366 / 768; }
 .lkl-gpages { position: absolute; inset: 0; }
@@ -375,7 +376,7 @@
     --lkl-m-rf-belly: url(/assets/about-lift/lk-m-rf-belly.webp?v=g1);
     --lkl-m-rf-yawn: url(/assets/about-lift/lk-m-rf-yawn.webp?v=g1);
     --lkl-m-p2: url(/assets/about-lift/lk-m-p2.webp?v=g1);
-    --lkl-m-p3: url(/assets/about-lift/lk-m-p3.webp?v=g1);
+    --lkl-m-p3: url(/assets/about-lift/lk-p3-fullbody.png?v=p3-fullbody-3);
   }
   .lkl-frame { height: auto; min-height: 0; }
   .lkl-frame::before { background: none; filter: none; }
@@ -418,10 +419,18 @@
   /* 樓層場景：鏡頭框＝直式圖本身的比例，蓋滿畫面 */
   .lkl-cam { width: max(100%, calc(100cqh * 941 / 1672)); aspect-ratio: 941 / 1672; }
   .lkl-scene[data-floor="P2"] .lkl-cam { width: max(100%, calc(100cqh * 941 / 1670)); aspect-ratio: 941 / 1670; }
+  /* P3 手機沿用桌機同一張全身 master，以較小遠景置中顯示；
+     不再依直式門洞高度 cover 放大，避免人物占滿門框。 */
+  .lkl-scene[data-floor="P3"] .lkl-cam { width: 100%; height: 100%; aspect-ratio: auto; }
   .lkl-bg { background-size: 100% 100%; }
   .lkl-scene[data-floor="RF"] .lkl-bg { background-image: var(--lkl-m-rf); background-size: 100% 100%; }
   .lkl-scene[data-floor="P2"] .lkl-bg { background-image: var(--lkl-m-p2); }
-  .lkl-scene[data-floor="P3"] .lkl-bg { background-image: var(--lkl-m-p3); }
+  .lkl-scene[data-floor="P3"] .lkl-bg {
+    background-color: #080f17;
+    background-image: var(--lkl-m-p3);
+    background-position: center;
+    background-size: auto 60%;
+  }
   .lkl-belly { background-image: var(--lkl-m-rf-belly); background-size: 100% 100%; }
   .lkl-yawn  { background-image: var(--lkl-m-rf-yawn);  background-size: 100% 100%; }
   .lkl-belly, .lkl-yawn {
