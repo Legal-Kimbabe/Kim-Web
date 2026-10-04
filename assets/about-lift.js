@@ -73,13 +73,13 @@
   function scene(f) { return $('.lkl-scene[data-floor="' + f + '"]'); }
   function inner(f) { return $('.lkl-cam-inner', scene(f)); }
 
-  /* G 圖片準備：P1 與目前裝置的電梯先 decode；P2－P5 進 G 後才依序 idle 準備。 */
+  /* G 圖片準備：P1 與目前裝置的電梯先 decode；P2－P4 進 G 後才依序 idle 準備。
+     P5 是有聲影片，只在使用者到 P4 後才開始 preload。 */
   var G_IMAGES = {
     1: '/assets/about-lift/lk-g-p1.webp?v=g6',
     2: '/assets/about-lift/lk-g-p2.png?v=g8',
     3: '/assets/about-lift/lk-g-p3.png?v=g7',
-    4: '/assets/about-lift/lk-g-p4.png?v=g7',
-    5: '/assets/about-lift/lk-g-p5.png?v=g8'
+    4: '/assets/about-lift/lk-g-p4.png?v=g7'
   };
   var imageJobs = Object.create(null);
   var heldImages = Object.create(null);
@@ -112,6 +112,7 @@
   function currentElevatorImage() {
     return isM() ? '/assets/about-lift/lk-m-elevator.webp?v=g1' : '/assets/about-lift/lk-elevator-d2.webp?v=d2';
   }
+  var P3_IMAGE = '/assets/about-lift/lk-p3-fullbody.webp?v=p3-fullbody-lossless-1';
   function ensureGPage(n) {
     var url = G_IMAGES[n];
     if (!url) return Promise.resolve();
@@ -128,7 +129,7 @@
     return setTimeout(fn, 160);
   }
   function preloadRemainingG(n) {
-    if (n > 5) return;
+    if (n > 4) return;
     idleTask(function () {
       ensureGPage(n).then(function () { preloadRemainingG(n + 1); }, function () { /* 翻頁時會再試 */ });
     });
@@ -141,6 +142,34 @@
   function setGPageNow(n) {
     gPageIntent++;
     $('.lkl-gpages', scene('G')).setAttribute('data-page', String(n));
+    root.classList.toggle('is-gfinale', +n === 5);
+    if (+n !== 5) resetGFinale();
+  }
+  function gFinale() { return $('.lkl-gfinale', scene('G')); }
+  function preloadGFinale() {
+    var video = gFinale();
+    if (!video || video.preload === 'auto') return;
+    video.preload = 'auto';
+    video.load();
+  }
+  function resetGFinale() {
+    var video = gFinale();
+    if (!video) return;
+    video.pause();
+    try { video.currentTime = 0; } catch (_) { /* metadata may not be ready yet */ }
+    video.closest('.lkl-gpage').classList.remove('is-audio-blocked');
+  }
+  function playGFinaleFromGesture() {
+    var video = gFinale();
+    if (!video) return;
+    preloadGFinale();
+    video.muted = false;
+    video.volume = 1;
+    try { video.currentTime = 0; } catch (_) { /* playback will begin at zero after metadata */ }
+    var promise = video.play();
+    if (promise && promise.catch) {
+      promise.catch(function () { video.closest('.lkl-gpage').classList.add('is-audio-blocked'); });
+    }
   }
   async function openGPage(n) {
     n = +n;
@@ -148,7 +177,10 @@
     await ensureGPage(n);
     await nextFrame();                    /* CSS background 已掛上後再顯示，不讓第一次翻頁撞 decode */
     if (intent !== gPageIntent) return;
+    root.classList.toggle('is-gfinale', n === 5);
     $('.lkl-gpages', scene('G')).setAttribute('data-page', String(n));
+    if (n === 4) preloadGFinale();
+    else if (n !== 5) resetGFinale();
   }
   async function prepareGLayers() {
     root.classList.add('is-layer-prep');
@@ -336,6 +368,8 @@
     if (st.busy) return;
     st.busy = true;
     root.classList.remove('is-lobby');
+    /* P3 點下樓層鍵就開始下載與 decode；電梯移動期間在背景準備，門打開前必須 ready。 */
+    var targetReady = f === 'P3' ? loadAndDecode(P3_IMAGE) : Promise.resolve();
 
     if (st.out) {
       if (f === st.at) { st.busy = false; return; }
@@ -358,6 +392,7 @@
       setGPageNow(1);                       /* 抵達 G：門後與進場都先看到 P1 */
       await Promise.all([ensureGPage(1), loadAndDecode(currentElevatorImage())]);
     }
+    if (f === 'P3') await targetReady;
     showScene(f);
     root.setAttribute('data-at', f);
     if (f === 'RF') setCatState(0);
@@ -464,7 +499,15 @@
     if (t.matches('.lkl-call')) { goTo(t.getAttribute('data-floor')); return; }
     if (t.matches('.lkl-return')) { returnToElevator(); return; }
     var gn = t.closest('.lkl-gnav');
-    if (gn && !gn.disabled) { openGPage(gn.getAttribute('data-gpage')); if (scene('G').classList.contains('is-roam')) scene('G').scrollTo({ left: 0, behavior: 'smooth' }); return; }
+    if (gn && !gn.disabled) {
+      var targetGPage = +gn.getAttribute('data-gpage');
+      if (targetGPage === 5) playGFinaleFromGesture();
+      else resetGFinale();
+      openGPage(targetGPage);
+      if (scene('G').classList.contains('is-roam')) scene('G').scrollTo({ left: 0, behavior: 'smooth' });
+      return;
+    }
+    if (t.matches('.lkl-gvideo-sound')) { playGFinaleFromGesture(); return; }
     if (t.matches('.lkl-narr-next')) { narrNext(); return; }
     if (t.matches('.lkl-unzoom')) { walkBack(); return; }
     var a = t.getAttribute('data-action');
