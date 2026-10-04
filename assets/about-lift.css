@@ -13,7 +13,7 @@
   --lkl-img-car: url(/assets/about-lift/lk-elevator-d2.webp?v=d2);
   --lkl-img-rf: url(/assets/about-lift/lk-rf-cat-normal.webp?v=m1);
   --lkl-img-p2: url(/assets/about-lift/lk-p2.webp);
-  --lkl-img-p3: url(/assets/about-lift/lk-p3-fullbody.png?v=p3-fullbody-3);
+  --lkl-img-p3: url(/assets/about-lift/lk-p3-fullbody.webp?v=p3-fullbody-lossless-1);
   --lkl-img-rf-belly: url(/assets/about-lift/lk-rf-cat-belly.webp?v=m1);
   --lkl-img-rf-yawn: url(/assets/about-lift/lk-rf-cat-yawn.webp?v=m1);
 
@@ -170,7 +170,7 @@
 .lkl-gpage.is-p2 { background-image: var(--lkl-g-p2, none); opacity: 0; visibility: hidden; }
 .lkl-gpage.is-p3 { background-image: var(--lkl-g-p3, none); opacity: 0; visibility: hidden; }
 .lkl-gpage.is-p4 { background-image: var(--lkl-g-p4, none); opacity: 0; visibility: hidden; }
-.lkl-gpage.is-p5 { background-image: var(--lkl-g-p5, none); opacity: 0; visibility: hidden; }
+.lkl-gpage.is-p5 { background: #15130f; opacity: 0; visibility: hidden; overflow: hidden; }
 .lkl-gpages[data-page="2"] .is-p1 { opacity: 0; visibility: hidden; }
 .lkl-gpages[data-page="2"] .is-p2 { opacity: 1; visibility: visible; }
 .lkl-gpages[data-page="3"] .is-p1,
@@ -179,6 +179,19 @@
 .lkl-gpages[data-page="3"] .is-p3 { opacity: 1; visibility: visible; }
 .lkl-gpages[data-page="4"] .is-p4 { opacity: 1; visibility: visible; }
 .lkl-gpages[data-page="5"] .is-p5 { opacity: 1; visibility: visible; }
+.lkl-gfinale { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; background: #15130f; }
+.lkl-gvideo-sound {
+  position: absolute; left: 50%; bottom: 7%; z-index: 2; transform: translateX(-50%);
+  display: none; padding: .7em 1.1em; border: 1px solid rgba(255,255,255,.58); border-radius: 999px;
+  background: rgba(12,10,8,.64); color: #fff; font: 600 max(1.15cqw, 12px)/1 var(--lkl-sans);
+  letter-spacing: .06em; cursor: pointer; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.lkl-gpage.is-p5.is-audio-blocked .lkl-gvideo-sound { display: block; }
+.lkl-gpage.is-p5 .lkl-gnav::before {
+  content: "❮"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  color: #fff; font: 700 max(4.6cqw, 42px)/1 Arial, sans-serif;
+  text-shadow: 5px 3px rgba(75,49,38,.72), 10px 6px rgba(75,49,38,.38);
+}
 /* 透明熱區：不改變 reference 的任何視覺 */
 .lkl-dl, .lkl-gnav { position: absolute; display: block; padding: 0; border: 0; background: none; border-radius: 99px; pointer-events: none; -webkit-tap-highlight-color: transparent; }
 .lkl.is-out .lkl-scene[data-floor="G"].is-current .lkl-dl[href],
@@ -376,7 +389,7 @@
     --lkl-m-rf-belly: url(/assets/about-lift/lk-m-rf-belly.webp?v=g1);
     --lkl-m-rf-yawn: url(/assets/about-lift/lk-m-rf-yawn.webp?v=g1);
     --lkl-m-p2: url(/assets/about-lift/lk-m-p2.webp?v=g1);
-    --lkl-m-p3: url(/assets/about-lift/lk-p3-fullbody.png?v=p3-fullbody-3);
+    --lkl-m-p3: url(/assets/about-lift/lk-p3-fullbody.webp?v=p3-fullbody-lossless-1);
   }
   .lkl-frame { height: auto; min-height: 0; }
   .lkl-frame::before { background: none; filter: none; }
@@ -442,6 +455,18 @@
   .lkl.is-out .lkl-scene[data-floor="G"].is-current.is-roam { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; }
   .lkl-scene[data-floor="G"].is-roam::-webkit-scrollbar { display: none; }
   .lkl-scene[data-floor="G"].is-roam .lkl-cam { left: 0; top: 0; transform: none; height: 100%; }
+
+  /* P5 是橫式電影結尾：手機改成完整銀幕置中，不沿用 P1－P4 的寬幅橫向瀏覽。 */
+  .lkl.is-gfinale .lkl-scene[data-floor="G"] { overflow: hidden !important; }
+  .lkl.is-gfinale .lkl-scene[data-floor="G"] .lkl-cam {
+    left: 0; top: 0; width: 100%; height: 100%; aspect-ratio: auto; transform: none;
+  }
+  .lkl.is-gfinale .lkl-gpage.is-p5 { background: #080a0b; }
+  .lkl.is-gfinale .lkl-gfinale { object-fit: contain; }
+  .lkl.is-gfinale .lkl-gpage.is-p5 .lkl-gnav {
+    left: 2.5% !important; top: 50% !important; width: 56px !important; height: 72px !important;
+    z-index: 3; transform: translateY(-50%);
+  }
 
   /* RF 可點區（依直式 RF 圖量測） */
   .lkl-spot.is-cat  { left: 1.9%; top: 58.4%; width: 43.6%; height: 13.5%; --mx: 48%; --my: 42%; }
