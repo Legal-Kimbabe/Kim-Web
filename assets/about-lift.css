@@ -196,6 +196,13 @@
 .lkl-dl, .lkl-gnav { position: absolute; display: block; padding: 0; border: 0; background: none; border-radius: 99px; pointer-events: none; -webkit-tap-highlight-color: transparent; }
 .lkl.is-out .lkl-scene[data-floor="G"].is-current .lkl-dl[href],
 .lkl.is-out .lkl-scene[data-floor="G"].is-current .lkl-gnav:not(:disabled) { pointer-events: auto; cursor: pointer; }
+.lkl-dl-count {
+  position: absolute; left: 50%; top: calc(100% + max(.45cqw, 3px)); z-index: 2;
+  transform: translateX(-50%); color: rgba(255,255,255,.82);
+  font: 600 max(.8cqw, 10px)/1 Arial, sans-serif; font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 3px rgba(0,0,0,.85); white-space: nowrap; pointer-events: none;
+}
+.lkl-dl-count[hidden] { display: none !important; }
 .lkl-gnav { border-radius: 8px; }
 .lkl-scene[data-floor="P3"] .lkl-cam-inner { transition-timing-function: cubic-bezier(.45,.05,.25,1); }
 .lkl-belly, .lkl-yawn {
